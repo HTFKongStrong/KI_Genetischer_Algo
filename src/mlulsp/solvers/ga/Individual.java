@@ -6,7 +6,8 @@ import mlulsp.domain.ProductionSchedule;
 public class Individual {
 	static int firstPeriodforItems[];
 	static int lastPeriodforItems[];
-	static double pMut;
+	static double pMut;//Mutationswahrscheinlichkeit Individuen
+	//Mutationswahrscheinlichkeit= Wahrscheinlichkeit pro Bit gekippt zu werden 1/100 = 1 Bit von Hunder Kippen
 	
 	private int[][] genotype;
 	private ProductionSchedule phaenotype;

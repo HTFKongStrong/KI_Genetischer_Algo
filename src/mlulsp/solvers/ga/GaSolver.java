@@ -9,7 +9,7 @@ public class GaSolver implements Solver {
 	private final int anzahlLoesungen;
 
 	/*
-	 * hier können Parameter des GA angegeben werden z.B. PopulationsGroesse,
+	 * hier kï¿½nnen Parameter des GA angegeben werden z.B. PopulationsGroesse,
 	 * IterationenAnzahl
 	 */
 
@@ -22,11 +22,26 @@ public class GaSolver implements Solver {
 		Individual.mutationsWahrscheinlichkeit();
 
 		Individual elter, child;
+		
+		//MÃ¶gliche Vorgehensweise
+		int size = 10;
+		Individual [] pop = new Individual[size];
+		
+		for (int i = 0; i < pop.length; i++) {
+			pop[i]= new Individual(instance);
+			pop[i].initRandom();
+			pop[i].decoding(instance);
+			pop[i].evaluate();
+		}
+		
 		elter = new Individual(instance);
 		elter.initRandom();
 		elter.decoding(instance);
 		elter.evaluate();
 
+		while(size!=1/*ungleich 400000 instanzen*/) {
+			
+		}
 		
 		for (int i = 1; i < anzahlLoesungen; i++) {
 			child = new Individual(instance);
