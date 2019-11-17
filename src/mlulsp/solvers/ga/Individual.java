@@ -3,14 +3,17 @@ package mlulsp.solvers.ga;
 import mlulsp.domain.Instance;
 import mlulsp.domain.ProductionSchedule;
 
-public class Individual {
+public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 	static int firstPeriodforItems[];
 	static int lastPeriodforItems[];
+	 //jedes Individuum hat eine Mutationswahrscheinlichkeit: wert muss festgelegt werden
 	static double pMut;//Mutationswahrscheinlichkeit Individuen
 	//Mutationswahrscheinlichkeit= Wahrscheinlichkeit pro Bit gekippt zu werden 1/100 = 1 Bit von Hunder Kippen
+	//Mutation:
+	//Mutationsws: ws pro Bit zu kippen
 	
-	private int[][] genotype;
-	private ProductionSchedule phaenotype;
+	private int[][] genotype; // NUllen und einser
+	private ProductionSchedule phaenotype; // ph�notyp ist ein produktionsplan
 	private double fitness;	
 	
 	public ProductionSchedule getPhaenotype(){
@@ -45,16 +48,16 @@ public class Individual {
 		for(int i=0;i<firstPeriodforItems.length;i++){
     		anzahlPerioden +=  lastPeriodforItems[i]-firstPeriodforItems[i]+1;
 		}
-		pMut = 1./anzahlPerioden;
-		pMut = 0.0005;
+		pMut = 1./anzahlPerioden; //1 durch die Anzahl der Bits
+		//pMut = 0.0005; //Mutiere immer mit der gleichen wahrscheinlichkeit
 		//System.out.println("Mutationswahrscheinlichkeit : " + pMut);
 	}
 
-	Individual(Instance inst) {
+	Individual(Instance inst) { // Konstruktor: Array genotyp wird erstellt: muss so bleibem
 		genotype = new int[inst.getItemCount()][inst.getPeriodCount()];
 	}
 	
-	public void initRandom() {
+	public void initRandom() { 
 		for (int i = 0; i < genotype.length; i++) {
 			for (int j = 0; j < genotype[i].length; j++) {
 				if(Math.random()<0.5)	genotype[i][j] = 0;
@@ -63,7 +66,7 @@ public class Individual {
 		}
 	}
 	
-	public void initJustInTime() {
+	public void initJustInTime() { //Ein Individuum wo nur 1 drin steht
 //		for (int i = 0; i < genotype.length; i++) {
 //			for (int j = 0; j < genotype[i].length; j++) {
 //				genotype[i][j] = 1;
@@ -77,7 +80,7 @@ public class Individual {
 	}
 	
 
-	public void decoding(Instance instance){
+	public void decoding(Instance instance){ //nicht relevant
 		phaenotype = new ProductionSchedule(genotype, instance);		
 	}
 	
@@ -101,14 +104,14 @@ public class Individual {
 		System.out.println();
 	}
 	
-	public void evaluate(){
+	public void evaluate(){ //nichts �ndern
 		fitness = phaenotype.getCostSum();
 	}
 	public double getFitness(){
 		return fitness;
 	}
 	
-	public void reproduce(Individual elter){
+	public void reproduce(Individual elter){ //kopieren der gene: array kopieren: so lassen
 		for(int i=0;i<elter.genotype.length;i++){
 			for(int j=0;j<elter.genotype[i].length;j++){
 				this.genotype[i][j] = elter.genotype[i][j];
@@ -116,14 +119,34 @@ public class Individual {
 		}
 	}
 	
-	public void mutate(){
+	public void mutate(){ //ver�ndern
 		
-		for(int i=0;i<genotype.length;i++){
-			for(int j=firstPeriodforItems[i];j<=lastPeriodforItems[i];j++){
+		for(int i=0;i<genotype.length;i++){ //alle zeilen der Matrix durchgehen
+			for(int j=firstPeriodforItems[i];j<=lastPeriodforItems[i];j++){ //alle Spalten durchgehen
 				if(Math.random() < pMut){
 					if(genotype[i][j] == 1)genotype[i][j] = 0;
 					else                   genotype[i][j] = 1;
 				}
+			}
+		}
+	}
+	
+	//hier programmieren
+	
+	public void crossover(Individual mama, Individual papa) {
+		//art des durchschneiden entscheiden
+		int cross = (int)(Math.random()*genotype.length);
+		
+		for(int i=0;i<cross;i++){ //alle zeilen der Matrix durchgehen
+			for(int j= 0; j<genotype[i].length; j++){ //alle Spalten durchgehen
+				this.genotype[i][j]= mama.genotype[i][j];
+
+			}
+		}
+		for(int i=cross;i<genotype.length;i++){ //alle zeilen der Matrix durchgehen
+			for(int j= 0; j<genotype[i].length; j++){ //alle Spalten durchgehen
+				this.genotype[i][j]= papa.genotype[i][j];
+
 			}
 		}
 	}
