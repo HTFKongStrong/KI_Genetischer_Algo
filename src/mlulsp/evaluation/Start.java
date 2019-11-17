@@ -19,7 +19,7 @@ public class Start {
 	
 
 	public void exec() {
-		int anzahlLoesungenProInstanz = 400000;
+		int anzahlLoesungenProInstanz = 400000; //Anzahl an Lï¿½sungen die man rechnen will
 		// class1: anzahlLoesungenProInstanz =  50000
 		// class2: anzahlLoesungenProInstanz = 200000 
 		// class3: anzahlLoesungenProInstanz = 400000 
@@ -65,7 +65,7 @@ public class Start {
 		System.out.println();
 		if (anzahlInstanzen != 0) {
 			System.out.println("----> Anzahl Instanzen mit Vergleichswerten: " + anzahlInstanzen);
-			System.out.println("----> Anzahl optimal gelöster Instanzen: "	+ anzahlOptimal + "\t (Precision: " + precision + ")");
+			System.out.println("----> Anzahl optimal gelï¿½ster Instanzen: "	+ anzahlOptimal + "\t (Precision: " + precision + ")");
 			System.out.println("----> Durchschnittliche prozentuale Abweichung: " + (avgGapOptimal / anzahlInstanzen));
 		}
 	}
