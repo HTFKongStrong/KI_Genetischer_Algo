@@ -22,11 +22,11 @@ public class GaSolver implements Solver {
 		Individual.mutationsWahrscheinlichkeit();
 
 		Individual elter, child; //eigentlich n Individuen
-		
+
 		//Mögliche Vorgehensweise
 		int size = 10;
 		Individual [] pop = new Individual[size];
-		
+
 		for (int i = 0; i < pop.length; i++) {
 			pop[i]= new Individual(instance);
 			pop[i].initRandom();
@@ -40,7 +40,7 @@ public class GaSolver implements Solver {
 		elter.evaluate(); //Fitness der L�sung berechnen
 
 		//z.B 40 L�sungen: pro L�sung child erstellen
-		for (int i = 1; i < anzahlLoesungen; i++) { 
+		for (int i = 1; i < anzahlLoesungen; i++) {
 			//mit while ersetzen
 			// erlaubte Schleifendurchl�ufe: 400.000 / anz : danach break;
 			child = new Individual(instance);
@@ -52,12 +52,11 @@ public class GaSolver implements Solver {
 				//oder <= (das ist die Frage f�r uns)
 				if (child.getFitness() < elter.getFitness()) {
 					//System.out.println(i + " " + elter.getFitness());	//in jeder Iteration zeige beste L�sung
-				}				
+				}
 				elter = child;
 			}
 		}
-
+		elter.ausgabe(instance);
 		return elter.getPhaenotype();
-
 	}
 }
