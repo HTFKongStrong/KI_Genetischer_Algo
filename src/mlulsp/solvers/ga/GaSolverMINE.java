@@ -20,8 +20,8 @@ public class GaSolverMINE {
         Individual.mutationsWahrscheinlichkeit();
 
         //Population erstellen
-        int size = 10;
-        Individual [] population = new Individual[size];
+        int populationsGröße = 200;
+        Individual [] population = new Individual[populationsGröße];
 
         for (int i = 0; i < population.length; i++) {
             population[i]= new Individual(instance);

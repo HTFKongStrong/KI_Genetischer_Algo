@@ -17,7 +17,7 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 	//Mutationsws: ws pro Bit zu kippen
 
 	private int[][] genotype; // NUllen und einser
-	private ProductionSchedule phaenotype; // ph�notyp ist ein produktionsplan
+	private ProductionSchedule phaenotype; // phänotyp ist ein produktionsplan
 	private double fitness;
 
 	public ProductionSchedule getPhaenotype(){
@@ -48,12 +48,12 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 	}
 
 	public static void mutationsWahrscheinlichkeit(){
-		int anzahlPerioden  = 0;
-		for(int i=0;i<firstPeriodforItems.length;i++){
-    		anzahlPerioden +=  lastPeriodforItems[i]-firstPeriodforItems[i]+1;
-		}
-		pMut = 1./anzahlPerioden; //1 durch die Anzahl der Bits
-		//pMut = 0.0005; //Mutiere immer mit der gleichen wahrscheinlichkeit
+//		int anzahlPerioden  = 0;
+//		for(int i=0;i<firstPeriodforItems.length;i++){
+//    		anzahlPerioden +=  lastPeriodforItems[i]-firstPeriodforItems[i]+1;
+//		}
+//		pMut = 1./anzahlPerioden; //1 durch die Anzahl der Bits
+		pMut = 0.001; //Mutiere immer mit der gleichen wahrscheinlichkeit
 		//System.out.println("Mutationswahrscheinlichkeit : " + pMut);
 	}
 
