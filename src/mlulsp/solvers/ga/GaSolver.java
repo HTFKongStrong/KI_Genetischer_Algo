@@ -9,7 +9,7 @@ public class GaSolver implements Solver {
 	private final int anzahlLoesungen;
 
 	/*
-	 * hier k�nnen Parameter des GA angegeben werden z.B. PopulationsGroesse,
+	 * hier können Parameter des GA angegeben werden z.B. PopulationsGroesse,
 	 * IterationenAnzahl
 	 */
 
