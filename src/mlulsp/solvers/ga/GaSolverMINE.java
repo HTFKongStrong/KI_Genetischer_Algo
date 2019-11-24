@@ -3,7 +3,6 @@ package mlulsp.solvers.ga;
 import mlulsp.domain.Instance;
 import mlulsp.domain.ProductionSchedule;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class GaSolverMINE {
@@ -45,7 +44,7 @@ public class GaSolverMINE {
                 Individual papa = populationEltern.get(1);
 
                 //Crossover bzw. Rekombination der Eltern
-                ArrayList<Individual> kids = crossoverTemplateCrossover(mama, papa, instance);
+                ArrayList<Individual> kids = templateCrossover(mama, papa, instance);
 
                 //Mutation - beider Nachkommen
                 myMutation(kids.get(0));
@@ -115,8 +114,8 @@ public class GaSolverMINE {
     }
 
     //Kreuzungswahrscheinlichkeit in Individual nicht erwähnt
-    //ist schon in Individual
-    public ArrayList<Individual> crossoverTemplateCrossover(Individual mama, Individual papa, Instance instance){
+    //Crossover ist auch in Individual von Homberger
+    public ArrayList<Individual> templateCrossover(Individual mama, Individual papa, Instance instance){
         //Ergebnis sind 2 Kinder
         Individual schwester = new Individual(instance);
         Individual bruder = new Individual(instance);
