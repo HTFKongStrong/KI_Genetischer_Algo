@@ -20,6 +20,14 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 	private ProductionSchedule phaenotype; // phänotyp ist ein produktionsplan
 	private double fitness;
 
+	Individual(Instance inst) { // Konstruktor: Array genotyp wird erstellt: muss so bleibem
+		genotype = new int[inst.getItemCount()][inst.getPeriodCount()];
+	}
+
+	public int[][] getGenotype() {
+		return genotype;
+	}
+
 	public ProductionSchedule getPhaenotype(){
 		return phaenotype;
 	}
@@ -57,9 +65,6 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 		//System.out.println("Mutationswahrscheinlichkeit : " + pMut);
 	}
 
-	Individual(Instance inst) { // Konstruktor: Array genotyp wird erstellt: muss so bleibem
-		genotype = new int[inst.getItemCount()][inst.getPeriodCount()];
-	}
 
 	public void initRandom() {
 		for (int i = 0; i < genotype.length; i++) {
