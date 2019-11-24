@@ -49,6 +49,8 @@ public class GaSolverMINE {
                 ArrayList<Individual> kids = crossoverTemplateCrossover(mama, papa, instance);
 
                 //Mutation - beider Nachkommen
+                myMutation(kids.get(0));
+                myMutation(kids.get(1));
 
                 //Listen leeren?
             }
