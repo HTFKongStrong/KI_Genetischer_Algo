@@ -15,7 +15,7 @@ public class GaSolverMINE {
 
     public ProductionSchedule solve(Instance instance) {
         Individual.firstLastPeriodsBerechnen(instance);
-        Individual.mutationsWahrscheinlichkeit();
+       // Individual.mutationsWahrscheinlichkeit(); //auskommentiert Da Individual finale Mutationsws jetzt besitzt
         //beste Lösung
         double bestFitness = 999999999;
 
@@ -136,7 +136,17 @@ public class GaSolverMINE {
         return kids;
     }
 
-    public void mutation(){
-        //mutate() von Individual auf beide Nachkommen anwenden
+    //es gibt auch eine Mutate() von Homberger in Individual
+    //verwirrend mit firstPeriodforItems und lastPeriodForItems
+    public void myMutation(Individual ind){
+        for (int zeile = 0; zeile < ind.getGenotype().length ; zeile++) {
+            for (int spalte = 0; spalte < ind.getGenotype()[zeile].length ; spalte++) {
+                if (Math.random() <= Individual.pMut ){
+                    if(ind.getGenotype()[zeile][spalte] == 1) ind.getGenotype()[zeile][spalte] = 0;
+                    else                                      ind.getGenotype()[zeile][spalte] = 1;
+                }
+
+            }
+        }
     }
 }

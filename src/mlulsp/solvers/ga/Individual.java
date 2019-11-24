@@ -11,7 +11,7 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 	static int firstPeriodforItems[];
 	static int lastPeriodforItems[];
 	 //jedes Individuum hat eine Mutationswahrscheinlichkeit: wert muss festgelegt werden
-	static double pMut;//Mutationswahrscheinlichkeit Individuen
+	static final double pMut = 0.001;//Mutationswahrscheinlichkeit Individuen
 	//Mutationswahrscheinlichkeit= Wahrscheinlichkeit pro Bit gekippt zu werden 1/100 = 1 Bit von Hunder Kippen
 	//Mutation:
 	//Mutationsws: ws pro Bit zu kippen
@@ -61,7 +61,7 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 //    		anzahlPerioden +=  lastPeriodforItems[i]-firstPeriodforItems[i]+1;
 //		}
 //		pMut = 1./anzahlPerioden; //1 durch die Anzahl der Bits
-		pMut = 0.001; //Mutiere immer mit der gleichen wahrscheinlichkeit
+		//pMut = 0.001; //Mutiere immer mit der gleichen wahrscheinlichkeit
 		//System.out.println("Mutationswahrscheinlichkeit : " + pMut);
 	}
 
