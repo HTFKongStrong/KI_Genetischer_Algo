@@ -38,6 +38,7 @@ public class GaSolver implements Solver {
 		elter.initRandom(); //mit Nullen und Einsen in Individuum f�llen : Gene berechnen
 		elter.decoding(instance); //Berechnung ph�notyp : L�sung durch decodieren berechnen
 		elter.evaluate(); //Fitness der L�sung berechnen
+		//Decodierung wird für Evaluierung gebraucht
 
 		//z.B 40 L�sungen: pro L�sung child erstellen
 		for (int i = 1; i < anzahlLoesungen; i++) {
