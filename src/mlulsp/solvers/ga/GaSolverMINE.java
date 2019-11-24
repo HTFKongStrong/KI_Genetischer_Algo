@@ -3,6 +3,8 @@ package mlulsp.solvers.ga;
 import mlulsp.domain.Instance;
 import mlulsp.domain.ProductionSchedule;
 
+import java.util.ArrayList;
+
 public class GaSolverMINE {
     private final int anzahlLoesungen;
 
@@ -21,13 +23,29 @@ public class GaSolverMINE {
 
         //Population erstellen
         int populationsGröße = 200;
-        Individual [] population = new Individual[populationsGröße];
 
-        for (int i = 0; i < population.length; i++) {
-            population[i]= new Individual(instance);
-            population[i].initRandom();
-            population[i].decoding(instance);
-            population[i].evaluate();
+        ArrayList<Individual> population = new ArrayList<>();
+        for (int i = 0; i < populationsGröße; i++) {
+            population.add(new Individual(instance));
+            population.get(i).initRandom();
+            population.get(i).decoding(instance);
+            population.get(i).evaluate();
+        }
+
+        //Kinder zeugen
+        int terminationskriterium = 0;
+        int anzahlPopulation = 0;
+
+        while(terminationskriterium < 400000){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
+            while(!(anzahlPopulation < populationsGröße)){ //beenden wenn gleiche Populationsgröße erreicht ist
+                //Selektieren 2er Eltern
+
+                //Crossover - Rekombination der Eltern
+
+                //Mutation - beider Nachkommen
+
+
+            }
         }
 
         //Schritte aufschreiben und folgendes Verändern
@@ -58,5 +76,15 @@ public class GaSolverMINE {
         }
         elter.ausgabe(instance);
         return elter.getPhaenotype();
+    }
+    public void selektion(){
+
+    }
+    public void crossover(){
+
+    }
+
+    public void mutation(){
+
     }
 }
