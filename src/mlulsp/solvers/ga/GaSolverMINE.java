@@ -45,7 +45,7 @@ public class GaSolverMINE {
                 Individual mama = populationEltern.get(0);
                 Individual papa = populationEltern.get(1);
 
-                //Crossover - Rekombination der Eltern
+                //Crossover bzw. Rekombination der Eltern
                 ArrayList<Individual> kids = crossoverTemplateCrossover(mama, papa, instance);
 
                 //Mutation - beider Nachkommen
