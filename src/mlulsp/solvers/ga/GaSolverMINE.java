@@ -15,6 +15,7 @@ public class GaSolverMINE {
     public ProductionSchedule solve(Instance instance) {
         Individual.firstLastPeriodsBerechnen(instance);
         Individual.mutationsWahrscheinlichkeit();
+        //beste Lösung
         double bestFitness = 999999999;
 
         //Population erstellen & Auswerten
