@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class GaSolverMINE {
+    static double bestFitness = 999999999; //beste Lösung
     private final int anzahlLoesungen; //wofür brauche ich dich?????????
 
     public GaSolverMINE(int anzahlLoesungen) {
@@ -16,8 +17,6 @@ public class GaSolverMINE {
     public ProductionSchedule solve(Instance instance) {
         Individual.firstLastPeriodsBerechnen(instance);
        // Individual.mutationsWahrscheinlichkeit(); //auskommentiert Da Individual finale Mutationsws jetzt besitzt
-        //beste Lösung
-        double bestFitness = 999999999;
 
         //Population erstellen & Auswerten
         int populationsGröße = 200;
@@ -31,15 +30,15 @@ public class GaSolverMINE {
 
             double fitness =  populationEltern.get(i).getFitness();
             if (i == 0){ bestFitness = fitness; }
-            if (fitness < bestFitness){ bestFitness = fitness;} //suche nach minimierter Fitness
+            minimizeBestFitness(fitness);
         }
 
         //Kinder zeugen
         int terminationskriterium = 0;
-        int anzahlPopulation = 0;
+        ArrayList<Individual> populationKids = new ArrayList<>();
 
         while(terminationskriterium < 400000){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
-            while(!(anzahlPopulation < populationsGröße)){ //beenden wenn gleiche Populationsgröße erreicht ist
+            while(populationKids.size() < populationsGröße){ //beenden wenn gleiche Populationsgröße erreicht ist
                 //Selektieren 2er Eltern
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
                 Individual mama = populationEltern.get(0);
@@ -52,8 +51,15 @@ public class GaSolverMINE {
                 myMutation(kids.get(0));
                 myMutation(kids.get(1));
 
-                //Listen leeren?
+                //zur neuen Population hinzufügen
+                populationKids.add(kids.get(0));
+                populationKids.add(kids.get(1));
             }
+            //decode und evaluate neue Population
+            //dabei in der Methode schon nach neuer bestLösung gesucht
+            decodeKids(populationKids, instance);
+
+
         }
         //return den Phänotyp vom Typ ProductionSchedule
         return phänotypBestFitness;
@@ -150,5 +156,27 @@ public class GaSolverMINE {
 
             }
         }
+    }
+
+    //suche nach minimierter Fitness
+    public void minimizeBestFitness(double fitness){
+        if (fitness < bestFitness){ bestFitness = fitness;}
+    }
+
+    //decode und evaluate neue Generation
+    // neue bestLösung dabei suchen
+    public void decodeKids(ArrayList<Individual> populationKids, Instance instance){
+        for (Individual ind: populationKids) {
+            ind.decoding(instance);
+            ind.evaluate();
+            double fitness =  ind.getFitness();
+            minimizeBestFitness(fitness);
+        }
+    }
+
+    //Delete 75% der Eltern und behalte 25% (Random)
+    //Delete 25% der Kinder und behalte 75% (delete schlechteste)
+    public void replaceDelete75Nlast25(ArrayList<Individual> kids, ArrayList<Individual> eltern){
+
     }
 }
