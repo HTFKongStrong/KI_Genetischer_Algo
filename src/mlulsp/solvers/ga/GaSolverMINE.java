@@ -42,14 +42,15 @@ public class GaSolverMINE {
             while(!(anzahlPopulation < populationsGröße)){ //beenden wenn gleiche Populationsgröße erreicht ist
                 //Selektieren 2er Eltern
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
-                Individual eltern1 = populationEltern.get(0);
-                Individual eltern2 = populationEltern.get(1);
+                Individual mama = populationEltern.get(0);
+                Individual papa = populationEltern.get(1);
 
                 //Crossover - Rekombination der Eltern
+                ArrayList<Individual> kids = crossoverTemplateCrossover(mama, papa, instance);
 
                 //Mutation - beider Nachkommen
 
-
+                //Listen leeren?
             }
         }
         //return den Phänotyp vom Typ ProductionSchedule
@@ -105,8 +106,34 @@ public class GaSolverMINE {
         return indexIndividuum;
     }
 
-    public void crossover(){
-        //ist schon in Individual
+    //Kreuzungswahrscheinlichkeit in Individual nicht erwähnt
+    //ist schon in Individual
+    public ArrayList<Individual> crossoverTemplateCrossover(Individual mama, Individual papa, Instance instance){
+        //Ergebnis sind 2 Kinder
+        Individual schwester = new Individual(instance);
+        Individual bruder = new Individual(instance);
+
+        //Erstellung eines Templates
+        //vllt nochmal ohne erstellung eines Individuums, da begrenzte Anzahl zur Verfügung
+        Individual template = new Individual(instance);
+        template.initRandom();
+
+        for (int zeile = 0; zeile < template.getGenotype().length ; zeile++) {
+            for (int spalte = 0; spalte < template.getGenotype()[zeile].length ; spalte++) {
+                if (template.getGenotype()[zeile][spalte] == 1 ){
+                    schwester.getGenotype()[zeile][spalte] = mama.getGenotype()[zeile][spalte];
+                    bruder.getGenotype()[zeile][spalte] = papa.getGenotype()[zeile][spalte];
+                }
+                if (template.getGenotype()[zeile][spalte] == 0 ){
+                    schwester.getGenotype()[zeile][spalte] = papa.getGenotype()[zeile][spalte];
+                    bruder.getGenotype()[zeile][spalte] = mama.getGenotype()[zeile][spalte];
+                }
+            }
+        }
+        ArrayList<Individual> kids = new ArrayList<>();
+        kids.add(schwester);
+        kids.add(bruder);
+        return kids;
     }
 
     public void mutation(){
