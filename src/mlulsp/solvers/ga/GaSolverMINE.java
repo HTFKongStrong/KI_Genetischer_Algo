@@ -6,12 +6,7 @@ import mlulsp.domain.ProductionSchedule;
 import java.util.ArrayList;
 
 public class GaSolverMINE {
-    private final int anzahlLoesungen;
-
-    /*
-     * hier können Parameter des GA angegeben werden z.B. PopulationsGroesse,
-     * IterationenAnzahl
-     */
+    private final int anzahlLoesungen; //wofür brauche ich dich?????????
 
     public GaSolverMINE(int anzahlLoesungen) {
         this.anzahlLoesungen = anzahlLoesungen;
@@ -20,8 +15,9 @@ public class GaSolverMINE {
     public ProductionSchedule solve(Instance instance) {
         Individual.firstLastPeriodsBerechnen(instance);
         Individual.mutationsWahrscheinlichkeit();
+        double bestFitness = 999999999;
 
-        //Population erstellen
+        //Population erstellen & Auswerten
         int populationsGröße = 200;
 
         ArrayList<Individual> population = new ArrayList<>();
@@ -30,6 +26,10 @@ public class GaSolverMINE {
             population.get(i).initRandom();
             population.get(i).decoding(instance);
             population.get(i).evaluate();
+
+            double fitness =  population.get(i).getFitness();
+            if (i == 0){ bestFitness = fitness; }
+            if (fitness < bestFitness){ bestFitness = fitness;} //suche nach minimierter Fitness
         }
 
         //Kinder zeugen
@@ -47,44 +47,17 @@ public class GaSolverMINE {
 
             }
         }
-
-        //Schritte aufschreiben und folgendes Verändern
-        Individual elter, child; //eigentlich n Individuen
-
-        //macht nur einen Child durch: -> Mutation elter -> Kind
-        elter = new Individual(instance);
-        elter.initRandom(); //mit Nullen und Einsen in Individuum f�llen : Gene berechnen
-        elter.decoding(instance); //Berechnung ph�notyp : L�sung durch decodieren berechnen
-        elter.evaluate(); //Fitness der L�sung berechnen
-
-        //z.B 40 L�sungen: pro L�sung child erstellen
-        for (int i = 1; i < anzahlLoesungen; i++) {
-            //mit while ersetzen
-            // erlaubte Schleifendurchl�ufe: 400.000 / anz : danach break;
-            child = new Individual(instance);
-            child.reproduce(elter); //elternteil reproduzieren (Gene): es entsteht eine Kopie der Eltern
-            child.mutate(); //Gene werden mutiert: aus 1 wird 0
-            child.decoding(instance); //Gene werden decodiert
-            child.evaluate(); //Kind wird bewertet
-            if (child.getFitness() < elter.getFitness()) { //wollen minimieren: also kleiner Verbesserung
-                //oder <= (das ist die Frage f�r uns)
-                if (child.getFitness() < elter.getFitness()) {
-                    //System.out.println(i + " " + elter.getFitness());	//in jeder Iteration zeige beste L�sung
-                }
-                elter = child;
-            }
-        }
-        elter.ausgabe(instance);
-        return elter.getPhaenotype();
+        //return den Phänotyp vom Typ ProductionSchedule
+        return phänotypBestFitness;
     }
     public void selektion(){
 
     }
     public void crossover(){
-
+        //ist schon in Individual
     }
 
     public void mutation(){
-
+        //mutate() von Individual auf beide Nachkommen anwenden
     }
 }
