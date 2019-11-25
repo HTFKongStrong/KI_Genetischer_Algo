@@ -32,6 +32,10 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 		return phaenotype;
 	}
 
+    public double getFitness(){
+        return fitness;
+    }
+
 	public static void firstLastPeriodsBerechnen(Instance inst){
 		ProductionSchedule dummySolution = new ProductionSchedule(inst.getItemCount(), inst.getPeriodCount());
 		dummySolution.justInTime();
@@ -115,9 +119,6 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 
 	public void evaluate(){ //nichts �ndern
 		fitness = phaenotype.getCostSum();
-	}
-	public double getFitness(){
-		return fitness;
 	}
 
 	public void reproduce(Individual elter){ //kopieren der gene: array kopieren: so lassen
