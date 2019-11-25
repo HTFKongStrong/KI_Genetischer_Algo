@@ -3,10 +3,15 @@ package mlulsp.solvers.ga;
 import mlulsp.domain.Instance;
 import mlulsp.domain.ProductionSchedule;
 
+import java.text.CollationElementIterator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class GaSolverMINE {
     static double bestFitness = 999999999; //beste Lösung
+    static final int populationsGröße = 200;
     private final int anzahlLoesungen; //wofür brauche ich dich?????????
 
     public GaSolverMINE(int anzahlLoesungen) {
@@ -18,7 +23,6 @@ public class GaSolverMINE {
        // Individual.mutationsWahrscheinlichkeit(); //auskommentiert Da Individual finale Mutationsws jetzt besitzt
 
         //Population erstellen & Auswerten
-        int populationsGröße = 200;
 
         ArrayList<Individual> populationEltern = new ArrayList<>();
         for (int i = 0; i < populationsGröße; i++) {
@@ -58,6 +62,11 @@ public class GaSolverMINE {
             //dabei in der Methode schon nach neuer bestLösung gesucht
             decodeKids(populationKids, instance);
 
+            //Replace Eltern mit kids
+            ArrayList<Individual> newGeneration = replaceDelete75Nlast25(populationKids, populationEltern);
+            populationEltern.clear();
+            populationKids.clear();
+            populationEltern = newGeneration;
 
         }
         //return den Phänotyp vom Typ ProductionSchedule
@@ -168,6 +177,7 @@ public class GaSolverMINE {
         for (Individual ind: populationKids) {
             ind.decoding(instance);
             ind.evaluate();
+
             double fitness =  ind.getFitness();
             minimizeBestFitness(fitness);
         }
@@ -175,7 +185,38 @@ public class GaSolverMINE {
 
     //Delete 75% der Eltern und behalte 25% (Random)
     //Delete 25% der Kinder und behalte 75% (delete schlechteste)
-    public void replaceDelete75Nlast25(ArrayList<Individual> kids, ArrayList<Individual> eltern){
+    //andere Verhältnisse vllt besser?
+    public ArrayList<Individual> replaceDelete75Nlast25(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern){
+        ArrayList<Individual> newGeneration = new ArrayList<>();
+        //50 eltern (25%) sollen in newGeneration übernommen werden
+        for (int i = 0; i < 50 ; i++) {
+            int indexInd = (int) (Math.random() * 200) +1; //Zufallszahl zw. 0-populationsgröße
+            newGeneration.add(populationEltern.get(indexInd));
+        }
+        //alle Elemente der eltern generation löschen
+        populationEltern.clear();
 
+        //nur zum testen: danach löschen
+        if (newGeneration.size() != 50){
+            System.out.println("Die Größe stimmt nicht überein. Obere forSchleife anpassen");
+        }
+
+        //sort populationKids: schlechteste Fitness oben
+        //check if sorted right: die kleinste Fitness muss oben sein
+        Comparator<Individual> compareByFitness = (Individual o1, Individual o2) -> Double.compare(o1.getFitness(), o2.getFitness());
+        Collections.sort(populationKids, compareByFitness);
+        //falls falsch sortiert: folgendes entkommentieren
+        //Collections.sort(populationKids, compareByFitness.reversed());
+
+        //kids 25% / 50 schlechtesten löschen
+        for (int i = 0; i < 50 ; i++) {
+            populationKids.remove(i);
+        }
+
+        //restlichen Kids zur neuen Generation hinzufügen
+        for (Individual ind: populationKids) {
+            newGeneration.add(ind);
+        }
+        return newGeneration;
     }
 }
