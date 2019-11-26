@@ -36,7 +36,7 @@ public class GaSolverMINE {
 
             double fitness = populationEltern.get(i).getFitness();
             if (i == 0){ bestFitness = fitness; indBestFitness = populationEltern.get(0);}
-            minimizeBestFitness(populationEltern.get(i), indBestFitness);
+            indBestFitness = minimizeBestFitness(populationEltern.get(i), indBestFitness);
         }
         anzahlIndividuenGes += populationsGroesse;
 
@@ -65,7 +65,7 @@ public class GaSolverMINE {
             }
             //decode und evaluate neue Population
             //dabei in der Methode schon nach neuer bestLösung gesucht
-            decodeKids(populationKids, instance, indBestFitness);
+            indBestFitness = decodeKids(populationKids, instance, indBestFitness);
 
             //Replace Eltern mit kids
             ArrayList<Individual> newGeneration = replaceDeleteNlast(populationKids, populationEltern, anzahlKeepDelete);
@@ -89,19 +89,20 @@ public class GaSolverMINE {
         ArrayList<Integer> selectedInd = new ArrayList<>();
 
         //Berechnung Gesamtfitness
-        for (int i = 0; i < populationEltern.size(); i++){
-            gesamtFitness +=populationEltern.get(i).getFitness();
+        for (Individual ind: populationEltern) {
+            gesamtFitness += ind.getFitness();
         }
 
         //Berechnung Verhältnisse & in ArrayList speichern
         int add = 0;
-        for (int i = 0; i < populationEltern.size(); i++) {
-            double verhältnis = populationEltern.get(i).getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
+        for (Individual ind: populationEltern) {
+            double verhaeltnis = ind.getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
             //Max zahlen ber. und in ArrayList speichern
-            int max = (int) verhältnis * 1000; //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
+            int max = (int) verhaeltnis * 1000; //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
             add += max;
             maxZahlenInd.add(add);
         }
+
         //Berechnung Zufallszahlen: zw. 0-1000
 //        int zufallszahl1 = (int)(Math.random() * 1000) + 1;
 //        int zufallszahl2 = (int)(Math.random() * 1000) + 1;
@@ -125,7 +126,7 @@ public class GaSolverMINE {
 
     }
     //Get Index Individuum das die Zufallszahl trifft
-    public int getIndRoulette(int zufallszahl, ArrayList<Integer> maxZahlenInd ){
+    private int getIndRoulette(int zufallszahl, ArrayList<Integer> maxZahlenInd ){
         int indexIndividuum = 0;
         int maxZahlIndVorherig = 0;
         if (!(zufallszahl == 0)){
@@ -140,7 +141,7 @@ public class GaSolverMINE {
     }
 
     //Crossover ist auch in Individual von Homberger
-    public ArrayList<Individual> templateCrossover(Individual mama, Individual papa, Instance instance){
+    private ArrayList<Individual> templateCrossover(Individual mama, Individual papa, Instance instance){
         //Ergebnis sind 2 Kinder
         Individual schwester = new Individual(instance);
         Individual bruder = new Individual(instance);
@@ -173,7 +174,7 @@ public class GaSolverMINE {
 
     //es gibt auch eine Mutate() von Homberger in Individual
     //verwirrend mit firstPeriodforItems und lastPeriodForItems
-    public void myMutation(Individual ind){
+    private void myMutation(Individual ind){
         for (int zeile = 0; zeile < ind.getGenotype().length ; zeile++) {
             for (int spalte = 0; spalte < ind.getGenotype()[zeile].length ; spalte++) {
                 if (Math.random() <= Individual.pMut ){
@@ -186,29 +187,31 @@ public class GaSolverMINE {
     }
 
     //suche nach minimierter Fitness
-    public void minimizeBestFitness(Individual ind, Individual indBestFitness){
+    private Individual minimizeBestFitness(Individual ind, Individual indBestFitness){
         double fitness = ind.getFitness();
         if (fitness < bestFitness){
             bestFitness = fitness;
             indBestFitness = ind;
         }
+        return indBestFitness;
     }
 
     //decode und evaluate neue Generation
     // dabei neue bestLösung suchen
-    public void decodeKids(ArrayList<Individual> populationKids, Instance instance, Individual indBestFitness){
+    private Individual decodeKids(ArrayList<Individual> populationKids, Instance instance, Individual indBestFitness){
         for (Individual ind: populationKids) {
             ind.decoding(instance);
             ind.evaluate();
 
-            minimizeBestFitness(ind, indBestFitness);
+            indBestFitness = minimizeBestFitness(ind, indBestFitness);
         }
+        return indBestFitness;
     }
 
     //Delete 75% der Eltern und behalte 25% (Random)
     //Delete 25% der Kinder und behalte 75% (delete schlechteste)
     //andere Verhältnisse vllt besser?
-    public ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete){
+    private ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete){
         ArrayList<Individual> newGeneration = new ArrayList<>();
         //50 eltern (25%) sollen in newGeneration übernommen werden
         for (int i = 0; i < anzahlKeepDelete ; i++) {
@@ -233,9 +236,8 @@ public class GaSolverMINE {
         }
 
         //restlichen Kids zur neuen Generation hinzufügen
-        for (Individual ind: populationKids) {
-            newGeneration.add(ind);
-        }
+        newGeneration.addAll(populationKids);
+
         //Fehler abfangen
         if(newGeneration.size() != populationsGroesse){
             System.out.println("SCHRECKLICHER FEHLER IST PASSIERT: Die neue Generation ist nicht so groß wie die alte!!!!!!");
