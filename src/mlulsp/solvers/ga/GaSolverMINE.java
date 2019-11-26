@@ -10,6 +10,7 @@ import java.util.Comparator;
 public class GaSolverMINE {
     static double bestFitness = 999999999; //beste Lösung
     static final int populationsGröße = 200;
+    static int anzahlIndividuenGes = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
 
     private final int anzahlLoesungen;
 
@@ -35,15 +36,16 @@ public class GaSolverMINE {
             if (i == 0){ bestFitness = fitness; indBestFitness = populationEltern.get(0);}
             minimizeBestFitness(populationEltern.get(i), indBestFitness);
         }
+        anzahlIndividuenGes += populationsGröße;
 
         //Kinder zeugen
-        int terminationskriterium = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
         ArrayList<Individual> populationKids = new ArrayList<>();
         int generation = 0;
 
-        while(terminationskriterium < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
+        while(anzahlIndividuenGes < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
             while(populationKids.size() < populationsGröße){ //beenden wenn gleiche Populationsgröße erreicht ist
                 //Selektieren 2er Eltern
+                // müssen nicht zu anzahlIndividuenGes hinzugefügt werden, da oben schon hinzugefügt
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
                 Individual mama = populationEltern.get(0);
                 Individual papa = populationEltern.get(1);
@@ -79,7 +81,7 @@ public class GaSolverMINE {
     }
     public ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
         double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größerer Datentyp finden
-        ArrayList<Double> verhältnisIndividuum = new ArrayList<>(); //index = Individuum; gespeichert = verhältnis
+
         ArrayList<Integer> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
         ArrayList<Integer> selectedInd = new ArrayList<>();
 
@@ -92,7 +94,6 @@ public class GaSolverMINE {
         int add = 0;
         for (int i = 0; i < populationEltern.size(); i++) {
             double verhältnis = populationEltern.get(i).getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
-            verhältnisIndividuum.add(verhältnis);
             //Max zahlen ber. und in ArrayList speichern
             int max = (int) verhältnis * 1000; //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor 1000)
             add += max;
