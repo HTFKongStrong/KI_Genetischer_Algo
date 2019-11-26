@@ -10,17 +10,15 @@ import mlulsp.domain.ProductionSchedule;
 public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 	static int firstPeriodforItems[];
 	static int lastPeriodforItems[];
-	 //jedes Individuum hat eine Mutationswahrscheinlichkeit: wert muss festgelegt werden
+
 	static final double pMut = 0.001;//Mutationswahrscheinlichkeit Individuen
-	//Mutationswahrscheinlichkeit= Wahrscheinlichkeit pro Bit gekippt zu werden 1/100 = 1 Bit von Hunder Kippen
-	//Mutation:
-	//Mutationsws: ws pro Bit zu kippen
+    static final double pK = 0.7; //Kreuzungswahrscheinlichkeit
 
 	private int[][] genotype; // NUllen und einser
 	private ProductionSchedule phaenotype; // phänotyp ist ein produktionsplan
 	private double fitness;
 
-	Individual(Instance inst) { // Konstruktor: Array genotyp wird erstellt: muss so bleibem
+	Individual(Instance inst) { // Konstruktor: Array genotyp wird erstellt: muss so bleiben
 		genotype = new int[inst.getItemCount()][inst.getPeriodCount()];
 	}
 
@@ -153,7 +151,6 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 //		}
 //	}
 
-	//hier programmieren
 
 	public void crossover(Individual mama, Individual papa) {
 		//art des durchschneiden entscheiden
@@ -172,6 +169,7 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 			}
 		}
 	}
+
 	public void ausgabe(Instance instance){
 		try{
 			String ausgabeName = instance.getName();
