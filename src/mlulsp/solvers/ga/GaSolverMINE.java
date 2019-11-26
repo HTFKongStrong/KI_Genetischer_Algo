@@ -72,13 +72,17 @@ public class GaSolverMINE {
             populationEltern = newGeneration;
 
             generation ++;
+            anzahlIndividuenGes +=populationsGröße;
         }
 
         indBestFitness.ausgabe();
+
         //just for us
         System.out.println("Anzahl der Generationen: " + generation);
+
         return indBestFitness.getPhaenotype(); //return den Phänotyp vom Typ ProductionSchedule
     }
+
     public ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
         double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größerer Datentyp finden
 
