@@ -130,7 +130,6 @@ public class GaSolverMINE {
         return indexIndividuum;
     }
 
-    //Kreuzungswahrscheinlichkeit in Individual nicht erwähnt
     //Crossover ist auch in Individual von Homberger
     public ArrayList<Individual> templateCrossover(Individual mama, Individual papa, Instance instance){
         //Ergebnis sind 2 Kinder
@@ -138,19 +137,20 @@ public class GaSolverMINE {
         Individual bruder = new Individual(instance);
 
         //Erstellung eines Templates
-        //vllt nochmal ohne erstellung eines Individuums, da begrenzte Anzahl zur Verfügung
         Individual template = new Individual(instance);
         template.initRandom();
 
         for (int zeile = 0; zeile < template.getGenotype().length ; zeile++) {
             for (int spalte = 0; spalte < template.getGenotype()[zeile].length ; spalte++) {
-                if (template.getGenotype()[zeile][spalte] == 1 ){
-                    schwester.getGenotype()[zeile][spalte] = mama.getGenotype()[zeile][spalte];
-                    bruder.getGenotype()[zeile][spalte] = papa.getGenotype()[zeile][spalte];
-                }
-                if (template.getGenotype()[zeile][spalte] == 0 ){
-                    schwester.getGenotype()[zeile][spalte] = papa.getGenotype()[zeile][spalte];
-                    bruder.getGenotype()[zeile][spalte] = mama.getGenotype()[zeile][spalte];
+                if(Math.random() < Individual.pK){ //Kreuzungswahrscheinlichkeit
+                    if (template.getGenotype()[zeile][spalte] == 1 ){
+                        schwester.getGenotype()[zeile][spalte] = mama.getGenotype()[zeile][spalte];
+                        bruder.getGenotype()[zeile][spalte] = papa.getGenotype()[zeile][spalte];
+                    }
+                    if (template.getGenotype()[zeile][spalte] == 0 ){
+                        schwester.getGenotype()[zeile][spalte] = papa.getGenotype()[zeile][spalte];
+                        bruder.getGenotype()[zeile][spalte] = mama.getGenotype()[zeile][spalte];
+                    }
                 }
             }
         }
@@ -184,7 +184,7 @@ public class GaSolverMINE {
     }
 
     //decode und evaluate neue Generation
-    // neue bestLösung dabei suchen
+    // dabei neue bestLösung suchen
     public void decodeKids(ArrayList<Individual> populationKids, Instance instance, Individual indBestFitness){
         for (Individual ind: populationKids) {
             ind.decoding(instance);
