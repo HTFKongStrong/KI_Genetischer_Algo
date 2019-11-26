@@ -8,10 +8,12 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class GaSolverMINE {
-    static double bestFitness = 999999999; //beste Lösung
-    static final int populationsGröße = 200;
-    static int anzahlIndividuenGes = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
+    //Eigene zusetzende Entscheidungsvariablen
+    private final int populationsGroesse = 200;
+    private final int anzahlKeepDelete = 50; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
 
+    private double bestFitness = 999999999; //beste Lösung
+    private int anzahlIndividuenGes = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
     private final int anzahlLoesungen;
 
     public GaSolverMINE(int anzahlLoesungen) {
@@ -26,29 +28,28 @@ public class GaSolverMINE {
 
         //Population erstellen & Auswerten
         ArrayList<Individual> populationEltern = new ArrayList<>();
-        for (int i = 0; i < populationsGröße; i++) {
+        for (int i = 0; i < populationsGroesse; i++) {
             populationEltern.add(new Individual(instance));
             populationEltern.get(i).initRandom();
             populationEltern.get(i).decoding(instance);
             populationEltern.get(i).evaluate();
 
-            double fitness =  populationEltern.get(i).getFitness();
+            double fitness = populationEltern.get(i).getFitness();
             if (i == 0){ bestFitness = fitness; indBestFitness = populationEltern.get(0);}
             minimizeBestFitness(populationEltern.get(i), indBestFitness);
         }
-        anzahlIndividuenGes += populationsGröße;
+        anzahlIndividuenGes += populationsGroesse;
 
         //Kinder zeugen
         ArrayList<Individual> populationKids = new ArrayList<>();
-        int generation = 0;
 
         while(anzahlIndividuenGes < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
-            while(populationKids.size() < populationsGröße){ //beenden wenn gleiche Populationsgröße erreicht ist
+            while(populationKids.size() < populationsGroesse){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
                 //Selektieren 2er Eltern
-                // müssen nicht zu anzahlIndividuenGes hinzugefügt werden, da oben schon hinzugefügt
+                //müssen nicht zu anzahlIndividuenGes hinzugefügt werden, da oben schon hinzugefügt
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
-                Individual mama = populationEltern.get(0);
-                Individual papa = populationEltern.get(1);
+                Individual mama = populationEltern.get(elternIndex.get(0));
+                Individual papa = populationEltern.get(elternIndex.get(1));
 
                 //Crossover bzw. Rekombination der Eltern
                 ArrayList<Individual> kids = templateCrossover(mama, papa, instance);
@@ -60,31 +61,29 @@ public class GaSolverMINE {
                 //zur neuen Population hinzufügen
                 populationKids.add(kids.get(0));
                 populationKids.add(kids.get(1));
+
             }
             //decode und evaluate neue Population
             //dabei in der Methode schon nach neuer bestLösung gesucht
             decodeKids(populationKids, instance, indBestFitness);
 
             //Replace Eltern mit kids
-            ArrayList<Individual> newGeneration = replaceDelete75Nlast25(populationKids, populationEltern);
+            ArrayList<Individual> newGeneration = replaceDeleteNlast(populationKids, populationEltern, anzahlKeepDelete);
             populationEltern.clear();
             populationKids.clear();
             populationEltern = newGeneration;
 
-            generation ++;
-            anzahlIndividuenGes +=populationsGröße;
+            anzahlIndividuenGes += populationsGroesse;
         }
 
         indBestFitness.ausgabe();
 
-        //just for us
-        System.out.println("Anzahl der Generationen: " + generation);
-
         return indBestFitness.getPhaenotype(); //return den Phänotyp vom Typ ProductionSchedule
     }
 
-    public ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
+    private ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
         double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größerer Datentyp finden
+        //BigDecimal wenn zu klein
 
         ArrayList<Integer> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
         ArrayList<Integer> selectedInd = new ArrayList<>();
@@ -99,16 +98,21 @@ public class GaSolverMINE {
         for (int i = 0; i < populationEltern.size(); i++) {
             double verhältnis = populationEltern.get(i).getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
             //Max zahlen ber. und in ArrayList speichern
-            int max = (int) verhältnis * 1000; //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor 1000)
+            int max = (int) verhältnis * 1000; //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
             add += max;
             maxZahlenInd.add(add);
         }
         //Berechnung Zufallszahlen: zw. 0-1000
-        int zufallszahl1 = (int)(Math.random() * 1000) + 1;
-        int zufallszahl2 = (int)(Math.random() * 1000) + 1;
+//        int zufallszahl1 = (int)(Math.random() * 1000) + 1;
+//        int zufallszahl2 = (int)(Math.random() * 1000) + 1;
+
+        //um Fehler s.o zu vermeiden (zahlen !=1000)
+        int obereGrenze = add;
+        int zufallszahl1 = (int)(Math.random() * obereGrenze) + 1;
+        int zufallszahl2 = (int)(Math.random() * obereGrenze) + 1;
 
         //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
-        if (zufallszahl1 == zufallszahl2){ zufallszahl2 = (int)(Math.random() * 1000) + 1; }
+        if (zufallszahl1 == zufallszahl2){ zufallszahl2 = (int)(Math.random() * obereGrenze) + 1; }
 
         //get Index des Individuums das die Zufallszahl trifft
         int indZufallszahl1 = getIndRoulette(zufallszahl1, maxZahlenInd);
@@ -140,6 +144,8 @@ public class GaSolverMINE {
         //Ergebnis sind 2 Kinder
         Individual schwester = new Individual(instance);
         Individual bruder = new Individual(instance);
+        schwester.initRandom(); //Da pk: unter umständen nicht alles in der Matrix (genotyp) befüllt
+        bruder.initRandom();
 
         //Erstellung eines Templates
         Individual template = new Individual(instance);
@@ -202,36 +208,37 @@ public class GaSolverMINE {
     //Delete 75% der Eltern und behalte 25% (Random)
     //Delete 25% der Kinder und behalte 75% (delete schlechteste)
     //andere Verhältnisse vllt besser?
-    public ArrayList<Individual> replaceDelete75Nlast25(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern){
+    public ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete){
         ArrayList<Individual> newGeneration = new ArrayList<>();
         //50 eltern (25%) sollen in newGeneration übernommen werden
-        for (int i = 0; i < 50 ; i++) {
-            int indexInd = (int) (Math.random() * 200) +1; //Zufallszahl zw. 0-populationsgröße
+        for (int i = 0; i < anzahlKeepDelete ; i++) {
+            int indexInd = (int) (Math.random() * populationsGroesse) + 1; //Zufallszahl zw. 0-populationsgröße
             newGeneration.add(populationEltern.get(indexInd));
         }
         //alle Elemente der eltern generation löschen
         populationEltern.clear();
 
         //nur zum testen: danach löschen
-        if (newGeneration.size() != 50){
+        if (newGeneration.size() != anzahlKeepDelete){
             System.out.println("Die Größe stimmt nicht überein. Obere forSchleife anpassen");
         }
 
-        //sort populationKids: schlechteste Fitness oben
-        //check if sorted right: die kleinste Fitness muss oben sein
+        //sort populationKids: schlechteste Fitness oben: größte Fitness
         Comparator<Individual> compareByFitness = (Individual o1, Individual o2) -> Double.compare(o1.getFitness(), o2.getFitness());
-        Collections.sort(populationKids, compareByFitness);
-        //falls falsch sortiert: folgendes entkommentieren
-        //Collections.sort(populationKids, compareByFitness.reversed());
+        Collections.sort(populationKids, compareByFitness.reversed());
 
         //kids 25% / 50 schlechtesten löschen
-        for (int i = 0; i < 50 ; i++) {
+        for (int i = 0; i < anzahlKeepDelete ; i++) {
             populationKids.remove(i);
         }
 
         //restlichen Kids zur neuen Generation hinzufügen
         for (Individual ind: populationKids) {
             newGeneration.add(ind);
+        }
+        //Fehler abfangen
+        if(newGeneration.size() != populationsGroesse){
+            System.out.println("SCHRECKLICHER FEHLER IST PASSIERT: Die neue Generation ist nicht so groß wie die alte!!!!!!");
         }
         return newGeneration;
     }
