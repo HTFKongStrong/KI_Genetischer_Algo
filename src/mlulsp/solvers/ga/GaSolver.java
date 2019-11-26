@@ -43,14 +43,21 @@ public class GaSolver implements Solver {
 
         //Kinder zeugen
         ArrayList<Individual> populationKids = new ArrayList<>();
-
+        int generation =0;
         while(anzahlIndividuenGes < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
             while(populationKids.size() < populationsGroesse){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
                 //Selektieren 2er Eltern
                 //müssen nicht zu anzahlIndividuenGes hinzugefügt werden, da oben schon hinzugefügt
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
-                Individual mama = populationEltern.get(elternIndex.get(0));
-                Individual papa = populationEltern.get(elternIndex.get(1));
+                int groese1 = elternIndex.get(0);
+                int groese2 = elternIndex.get(1);
+ //               System.out.println("größe1: "+groese1);
+ //               System.out.println("größe2: "+groese2);
+                if(groese2 > populationsGroesse || groese1 > populationsGroesse){
+                    System.out.println("FEEEEEEEEHLER Index ist größer");
+                }
+                Individual mama = populationEltern.get(groese1);
+                Individual papa = populationEltern.get(groese2);
 
                 //Crossover bzw. Rekombination der Eltern
                 ArrayList<Individual> kids = templateCrossover(mama, papa, instance);
@@ -75,9 +82,12 @@ public class GaSolver implements Solver {
             populationEltern = newGeneration;
 
             anzahlIndividuenGes += populationsGroesse;
+            generation++;
+            System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
+            indBestFitness.ausgabe(instance);
         }
 
-        indBestFitness.ausgabe();
+        indBestFitness.ausgabe(instance);
 
         return indBestFitness.getPhaenotype(); //return den Phänotyp vom Typ ProductionSchedule
     }
@@ -93,16 +103,20 @@ public class GaSolver implements Solver {
         for (Individual ind: populationEltern) {
             gesamtFitness += ind.getFitness();
         }
+//        System.out.println("gesamtFitness: " + gesamtFitness);
 
         //Berechnung Verhältnisse & in ArrayList speichern
         int add = 0;
         for (Individual ind: populationEltern) {
             double verhaeltnis = ind.getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
             //Max zahlen ber. und in ArrayList speichern
-            int max = (int) verhaeltnis * 1000; //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
+//            System.out.println("verhältnis: " + verhaeltnis);
+            int max =(int) (verhaeltnis * 100000); //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
+//            System.out.println("max: " + max);
             add += max;
             maxZahlenInd.add(add);
         }
+//        System.out.println("add: "+add);
 
         //Berechnung Zufallszahlen: zw. 0-1000
 //        int zufallszahl1 = (int)(Math.random() * 1000) + 1;
@@ -112,16 +126,28 @@ public class GaSolver implements Solver {
         int obereGrenze = add;
         int zufallszahl1 = (int)(Math.random() * obereGrenze) + 1;
         int zufallszahl2 = (int)(Math.random() * obereGrenze) + 1;
-
-        //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
-        if (zufallszahl1 == zufallszahl2){ zufallszahl2 = (int)(Math.random() * obereGrenze) + 1; }
+//        System.out.println("obere Grenze: " + add);
+//        System.out.println("zufallszahl1: " + zufallszahl1);
+ //       System.out.println("zufallszahl2: " + zufallszahl2);
 
         //get Index des Individuums das die Zufallszahl trifft
-        int indZufallszahl1 = getIndRoulette(zufallszahl1, maxZahlenInd);
-        int indZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
+        int indexZufallszahl1 = getIndRoulette(zufallszahl1, maxZahlenInd);
+        int indexZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
 
-        selectedInd.add(indZufallszahl1);
-        selectedInd.add(indZufallszahl2);
+//        System.out.println("INDzufallszahl1: " + indZufallszahl1);
+//        System.out.println("INDzufallszahl2: " + indZufallszahl2);
+
+        //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
+        while (indexZufallszahl2 == indexZufallszahl1){
+            zufallszahl2 = (int)(Math.random() * obereGrenze) + 1;
+            indexZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
+        }
+        //ArrayIndexOutofBounds vermeiden
+        if (indexZufallszahl1 == populationsGroesse){ indexZufallszahl1 = populationsGroesse - 1; }
+        if (indexZufallszahl2 == populationsGroesse){ indexZufallszahl2 = populationsGroesse - 1; }
+
+        selectedInd.add(indexZufallszahl1);
+        selectedInd.add(indexZufallszahl2);
 
         return selectedInd;
 
@@ -216,7 +242,7 @@ public class GaSolver implements Solver {
         ArrayList<Individual> newGeneration = new ArrayList<>();
         //50 eltern (25%) sollen in newGeneration übernommen werden
         for (int i = 0; i < anzahlKeepDelete ; i++) {
-            int indexInd = (int) (Math.random() * populationsGroesse) + 1; //Zufallszahl zw. 0-populationsgröße
+            int indexInd = (int) (Math.random() * populationsGroesse); //Zufallszahl zw. 0-populationsgröße-1 //deswegen keine +1 am ende
             newGeneration.add(populationEltern.get(indexInd));
         }
         //alle Elemente der eltern generation löschen
