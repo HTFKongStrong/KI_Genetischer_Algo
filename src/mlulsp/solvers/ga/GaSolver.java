@@ -84,7 +84,6 @@ public class GaSolver implements Solver {
             anzahlIndividuenGes += populationsGroesse;
             generation++;
             System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
-            indBestFitness.ausgabe(instance);
         }
 
         indBestFitness.ausgabe(instance);
