@@ -3,9 +3,7 @@ package mlulsp.solvers.ga;
 import mlulsp.domain.Instance;
 import mlulsp.domain.ProductionSchedule;
 
-import java.text.CollationElementIterator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -13,7 +11,7 @@ public class GaSolverMINE {
     static double bestFitness = 999999999; //beste Lösung
     static final int populationsGröße = 200;
 
-    private final int anzahlLoesungen; //wofür brauche ich dich?????????
+    private final int anzahlLoesungen;
 
     public GaSolverMINE(int anzahlLoesungen) {
         this.anzahlLoesungen = anzahlLoesungen;
@@ -39,11 +37,11 @@ public class GaSolverMINE {
         }
 
         //Kinder zeugen
-        int terminationskriterium = 0;
+        int terminationskriterium = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
         ArrayList<Individual> populationKids = new ArrayList<>();
         int generation = 0;
 
-        while(terminationskriterium < 400000){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
+        while(terminationskriterium < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
             while(populationKids.size() < populationsGröße){ //beenden wenn gleiche Populationsgröße erreicht ist
                 //Selektieren 2er Eltern
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
@@ -75,34 +73,39 @@ public class GaSolverMINE {
         }
 
         indBestFitness.ausgabe();
+        //just for us
+        System.out.println("Anzahl der Generationen: " + generation);
         return indBestFitness.getPhaenotype(); //return den Phänotyp vom Typ ProductionSchedule
     }
     public ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
-        double GesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht
-        ArrayList<Double> verhältnisIndividuum = new ArrayList<>();
+        double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größerer Datentyp finden
+        ArrayList<Double> verhältnisIndividuum = new ArrayList<>(); //index = Individuum; gespeichert = verhältnis
         ArrayList<Integer> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
         ArrayList<Integer> selectedInd = new ArrayList<>();
 
         //Berechnung Gesamtfitness
         for (int i = 0; i < populationEltern.size(); i++){
-            GesamtFitness +=populationEltern.get(i).getFitness();
+            gesamtFitness +=populationEltern.get(i).getFitness();
         }
 
         //Berechnung Verhältnisse & in ArrayList speichern
+        int add = 0;
         for (int i = 0; i < populationEltern.size(); i++) {
-            double verhältnis = populationEltern.get(i).getFitness()/GesamtFitness; //Verhältnis = wert zw. 0 und 1
+            double verhältnis = populationEltern.get(i).getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
             verhältnisIndividuum.add(verhältnis);
             //Max zahlen ber. und in ArrayList speichern
-            int add=0;
             int max = (int) verhältnis * 1000; //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor 1000)
             add += max;
             maxZahlenInd.add(add);
         }
-        //Berechnung Zufallszahlen
+        //Berechnung Zufallszahlen: zw. 0-1000
         int zufallszahl1 = (int)(Math.random() * 1000) + 1;
         int zufallszahl2 = (int)(Math.random() * 1000) + 1;
 
-        //get Index Individuum das die Zufallszahl trifft
+        //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
+        if (zufallszahl1 == zufallszahl2){ zufallszahl2 = (int)(Math.random() * 1000) + 1; }
+
+        //get Index des Individuums das die Zufallszahl trifft
         int indZufallszahl1 = getIndRoulette(zufallszahl1, maxZahlenInd);
         int indZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
 
