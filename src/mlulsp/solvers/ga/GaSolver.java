@@ -83,7 +83,7 @@ public class GaSolver implements Solver {
 
             anzahlIndividuenGes += populationsGroesse;
             generation++;
-            System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
+            //System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
         }
 
         indBestFitness.ausgabe(instance);
@@ -95,7 +95,7 @@ public class GaSolver implements Solver {
         double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größerer Datentyp finden
         //BigDecimal wenn zu klein
 
-        ArrayList<Integer> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
+        ArrayList<Double> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
         ArrayList<Integer> selectedInd = new ArrayList<>();
 
         //Berechnung Gesamtfitness
@@ -105,12 +105,12 @@ public class GaSolver implements Solver {
 //        System.out.println("gesamtFitness: " + gesamtFitness);
 
         //Berechnung Verhältnisse & in ArrayList speichern
-        int add = 0;
+        double add = 0;
         for (Individual ind: populationEltern) {
             double verhaeltnis = ind.getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
             //Max zahlen ber. und in ArrayList speichern
 //            System.out.println("verhältnis: " + verhaeltnis);
-            int max =(int) (verhaeltnis * 100000); //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
+            double max = (verhaeltnis * 100000); //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
 //            System.out.println("max: " + max);
             add += max;
             maxZahlenInd.add(add);
@@ -122,10 +122,10 @@ public class GaSolver implements Solver {
 //        int zufallszahl2 = (int)(Math.random() * 1000) + 1;
 
         //um Fehler s.o zu vermeiden (zahlen !=1000)
-        int obereGrenze = add;
-        int zufallszahl1 = (int)(Math.random() * obereGrenze) + 1;
-        int zufallszahl2 = (int)(Math.random() * obereGrenze) + 1;
-//        System.out.println("obere Grenze: " + add);
+        double obereGrenze = add;
+        double zufallszahl1 = (Math.random() * obereGrenze) + 1;
+        double zufallszahl2 = (Math.random() * obereGrenze) + 1;
+ //       System.out.println("obere Grenze: " + add);
 //        System.out.println("zufallszahl1: " + zufallszahl1);
  //       System.out.println("zufallszahl2: " + zufallszahl2);
 
@@ -138,7 +138,7 @@ public class GaSolver implements Solver {
 
         //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
         while (indexZufallszahl2 == indexZufallszahl1){
-            zufallszahl2 = (int)(Math.random() * obereGrenze) + 1;
+            zufallszahl2 = (Math.random() * obereGrenze) + 1;
             indexZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
         }
         //ArrayIndexOutofBounds vermeiden
@@ -152,11 +152,11 @@ public class GaSolver implements Solver {
 
     }
     //Get Index Individuum das die Zufallszahl trifft
-    private int getIndRoulette(int zufallszahl, ArrayList<Integer> maxZahlenInd ){
+    private int getIndRoulette(double zufallszahl, ArrayList<Double> maxZahlenInd ){
         int indexIndividuum = 0;
-        int maxZahlIndVorherig = 0;
+        double maxZahlIndVorherig = 0;
         if (!(zufallszahl == 0)){
-            for (Integer maxZahlInd: maxZahlenInd) {
+            for (Double maxZahlInd: maxZahlenInd) {
                 if (zufallszahl == maxZahlInd){ break; }
                 if (zufallszahl > maxZahlIndVorherig && zufallszahl < maxZahlInd){ break;}
                 indexIndividuum++;
