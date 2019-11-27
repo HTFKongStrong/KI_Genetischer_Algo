@@ -110,7 +110,8 @@ public class GaSolver implements Solver {
             double verhaeltnis = ind.getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
             //Max zahlen ber. und in ArrayList speichern
 //            System.out.println("verhältnis: " + verhaeltnis);
-            double max = (verhaeltnis * 100000); //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
+            double max = (verhaeltnis * 100); //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
+     //       double max = verhaeltnis;
 //            System.out.println("max: " + max);
             add += max;
             maxZahlenInd.add(add);
@@ -123,8 +124,8 @@ public class GaSolver implements Solver {
 
         //um Fehler s.o zu vermeiden (zahlen !=1000)
         double obereGrenze = add;
-        double zufallszahl1 = (Math.random() * obereGrenze) + 1;
-        double zufallszahl2 = (Math.random() * obereGrenze) + 1;
+        double zufallszahl1 = (Math.random() * obereGrenze) ;
+        double zufallszahl2 = (Math.random() * obereGrenze) ;
  //       System.out.println("obere Grenze: " + add);
 //        System.out.println("zufallszahl1: " + zufallszahl1);
  //       System.out.println("zufallszahl2: " + zufallszahl2);
@@ -138,7 +139,7 @@ public class GaSolver implements Solver {
 
         //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
         while (indexZufallszahl2 == indexZufallszahl1){
-            zufallszahl2 = (Math.random() * obereGrenze) + 1;
+            zufallszahl2 = (Math.random() * obereGrenze) ;
             indexZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
         }
         //ArrayIndexOutofBounds vermeiden
@@ -237,15 +238,25 @@ public class GaSolver implements Solver {
     //Delete 75% der Eltern und behalte 25% (Random)
     //Delete 25% der Kinder und behalte 75% (delete schlechteste)
     //andere Verhältnisse vllt besser?
+
+    private int check(ArrayList<Integer> zahlenBesetzt){
+        int indexInd = (int) (Math.random() * populationsGroesse); //Zufallszahl zw. 0-populationsgröße-1 //deswegen keine +1 am ende
+        if (!zahlenBesetzt.contains(indexInd)) {
+            zahlenBesetzt.add(indexInd);
+            return indexInd;
+        }else{
+            return check(zahlenBesetzt);
+        }
+    }
+
     private ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete){
         ArrayList<Individual> newGeneration = new ArrayList<>();
+        ArrayList<Integer> zahlenBesetzt = new ArrayList<>();
         //50 eltern (25%) sollen in newGeneration übernommen werden
         for (int i = 0; i < anzahlKeepDelete ; i++) {
-            int indexInd = (int) (Math.random() * populationsGroesse); //Zufallszahl zw. 0-populationsgröße-1 //deswegen keine +1 am ende
+            int indexInd = check(zahlenBesetzt);
             newGeneration.add(populationEltern.get(indexInd));
         }
-        //alle Elemente der eltern generation löschen
-        populationEltern.clear();
 
         //nur zum testen: danach löschen
         if (newGeneration.size() != anzahlKeepDelete){
