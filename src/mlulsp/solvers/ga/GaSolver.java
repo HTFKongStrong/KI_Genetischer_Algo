@@ -45,19 +45,21 @@ public class GaSolver implements Solver {
         ArrayList<Individual> populationKids = new ArrayList<>();
         int generation =0;
         while(anzahlIndividuenGes < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
+            ArrayList<Individual> selektierteEltern = new ArrayList<>(); //Damit bei replace() nicht schon selektierte Individuuen behalten werden
             while(populationKids.size() < populationsGroesse){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
                 //Selektieren 2er Eltern
                 //müssen nicht zu anzahlIndividuenGes hinzugefügt werden, da oben schon hinzugefügt
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
                 int groese1 = elternIndex.get(0);
                 int groese2 = elternIndex.get(1);
- //               System.out.println("größe1: "+groese1);
- //               System.out.println("größe2: "+groese2);
+
                 if(groese2 > populationsGroesse || groese1 > populationsGroesse){
                     System.out.println("FEEEEEEEEHLER Index ist größer");
                 }
                 Individual mama = populationEltern.get(groese1);
                 Individual papa = populationEltern.get(groese2);
+                selektierteEltern.add(mama);
+                selektierteEltern.add(papa);
 
                 //Crossover bzw. Rekombination der Eltern
                 ArrayList<Individual> kids = templateCrossover(mama, papa, instance);
@@ -76,14 +78,14 @@ public class GaSolver implements Solver {
             indBestFitness = decodeKids(populationKids, instance, indBestFitness);
 
             //Replace Eltern mit kids
-            ArrayList<Individual> newGeneration = replaceDeleteNlast(populationKids, populationEltern, anzahlKeepDelete);
+            ArrayList<Individual> newGeneration = replaceDeleteNlast(populationKids, populationEltern, anzahlKeepDelete, selektierteEltern);
             populationEltern.clear();
             populationKids.clear();
             populationEltern = newGeneration;
 
             anzahlIndividuenGes += populationsGroesse;
             generation++;
-            //System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
+            System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
         }
 
         indBestFitness.ausgabe(instance);
@@ -92,7 +94,7 @@ public class GaSolver implements Solver {
     }
 
     private ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
-        double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größerer Datentyp finden
+        double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größeren Datentyp finden
         //BigDecimal wenn zu klein
 
         ArrayList<Double> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
@@ -102,40 +104,28 @@ public class GaSolver implements Solver {
         for (Individual ind: populationEltern) {
             gesamtFitness += ind.getFitness();
         }
-//        System.out.println("gesamtFitness: " + gesamtFitness);
 
         //Berechnung Verhältnisse & in ArrayList speichern
         double add = 0;
         for (Individual ind: populationEltern) {
             double verhaeltnis = ind.getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
             //Max zahlen ber. und in ArrayList speichern
-//            System.out.println("verhältnis: " + verhaeltnis);
-            double max = (verhaeltnis * 100); //Möglicher Fehler durch Rundung? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
-     //       double max = verhaeltnis;
-//            System.out.println("max: " + max);
+            double max = (verhaeltnis * 100); //double da -> Möglicher Fehler durch Rundung/casten? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
             add += max;
             maxZahlenInd.add(add);
         }
-//        System.out.println("add: "+add);
-
         //Berechnung Zufallszahlen: zw. 0-1000
-//        int zufallszahl1 = (int)(Math.random() * 1000) + 1;
-//        int zufallszahl2 = (int)(Math.random() * 1000) + 1;
+//        int zufallszahl1 = (int)(Math.random() * 100) + 1;
+//        int zufallszahl2 = (int)(Math.random() * 100) + 1;
 
-        //um Fehler s.o zu vermeiden (zahlen !=1000)
+        //um Fehler s.o zu vermeiden (zahlen !=100)
         double obereGrenze = add;
         double zufallszahl1 = (Math.random() * obereGrenze) ;
         double zufallszahl2 = (Math.random() * obereGrenze) ;
- //       System.out.println("obere Grenze: " + add);
-//        System.out.println("zufallszahl1: " + zufallszahl1);
- //       System.out.println("zufallszahl2: " + zufallszahl2);
 
         //get Index des Individuums das die Zufallszahl trifft
         int indexZufallszahl1 = getIndRoulette(zufallszahl1, maxZahlenInd);
         int indexZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
-
-//        System.out.println("INDzufallszahl1: " + indZufallszahl1);
-//        System.out.println("INDzufallszahl2: " + indZufallszahl2);
 
         //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
         while (indexZufallszahl2 == indexZufallszahl1){
@@ -235,32 +225,28 @@ public class GaSolver implements Solver {
         return indBestFitness;
     }
 
-    //Delete 75% der Eltern und behalte 25% (Random)
-    //Delete 25% der Kinder und behalte 75% (delete schlechteste)
-    //andere Verhältnisse vllt besser?
-
-    private int check(ArrayList<Integer> zahlenBesetzt){
+    private int check(ArrayList<Integer> zahlenBesetzt, ArrayList<Individual> selektierteEltern, ArrayList<Individual> populationEltern){
         int indexInd = (int) (Math.random() * populationsGroesse); //Zufallszahl zw. 0-populationsgröße-1 //deswegen keine +1 am ende
-        if (!zahlenBesetzt.contains(indexInd)) {
+        Individual ind = populationEltern.get(indexInd);
+        boolean x = selektierteEltern.contains(ind);
+        if (!zahlenBesetzt.contains(indexInd) && !selektierteEltern.contains(ind)) {
             zahlenBesetzt.add(indexInd);
             return indexInd;
         }else{
-            return check(zahlenBesetzt);
+            return check(zahlenBesetzt, selektierteEltern, populationEltern);
         }
     }
-
-    private ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete){
+    //Delete 75% der Eltern und behalte 25% (Random)
+    //Delete 25% der Kinder und behalte 75% (delete schlechteste)
+    //andere Verhältnisse vllt besser?
+    private ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete, ArrayList<Individual> selektierteEltern){
         ArrayList<Individual> newGeneration = new ArrayList<>();
         ArrayList<Integer> zahlenBesetzt = new ArrayList<>();
+
         //50 eltern (25%) sollen in newGeneration übernommen werden
         for (int i = 0; i < anzahlKeepDelete ; i++) {
-            int indexInd = check(zahlenBesetzt);
+            int indexInd = check(zahlenBesetzt, selektierteEltern, populationEltern);
             newGeneration.add(populationEltern.get(indexInd));
-        }
-
-        //nur zum testen: danach löschen
-        if (newGeneration.size() != anzahlKeepDelete){
-            System.out.println("Die Größe stimmt nicht überein. Obere forSchleife anpassen");
         }
 
         //sort populationKids: schlechteste Fitness oben: größte Fitness
@@ -275,10 +261,6 @@ public class GaSolver implements Solver {
         //restlichen Kids zur neuen Generation hinzufügen
         newGeneration.addAll(populationKids);
 
-        //Fehler abfangen
-        if(newGeneration.size() != populationsGroesse){
-            System.out.println("SCHRECKLICHER FEHLER IST PASSIERT: Die neue Generation ist nicht so groß wie die alte!!!!!!");
-        }
         return newGeneration;
     }
 }
