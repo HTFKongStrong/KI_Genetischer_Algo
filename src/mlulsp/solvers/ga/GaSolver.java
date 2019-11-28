@@ -11,7 +11,7 @@ import java.util.Comparator;
 public class GaSolver implements Solver {
     //Eigene zusetzende Entscheidungsvariablen
     private final int populationsGroesse = 200;
-    private final int anzahlKeepDelete = 50; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
+    private final int anzahlKeepDelete = 0; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
 
     private double bestFitness = 999999999; //beste Lösung
     private int anzahlIndividuenGes = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
@@ -260,7 +260,9 @@ public class GaSolver implements Solver {
 
         //restlichen Kids zur neuen Generation hinzufügen
         newGeneration.addAll(populationKids);
-
+        if (newGeneration.size() != populationEltern.size()){
+            System.out.println("FEEEEEEEHLER ungleiche Populationsgröße");
+        }
         return newGeneration;
     }
 }

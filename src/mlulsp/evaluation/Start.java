@@ -20,6 +20,7 @@ public class Start {
 
 	public void exec() {
 		int anzahlLoesungenProInstanz = 400000; //Anzahl an L�sungen die man rechnen will
+		//int anzahlLoesungenProInstanz = 50000; //Anzahl an L�sungen die man rechnen will
 		// class1: anzahlLoesungenProInstanz =  50000
 		// class2: anzahlLoesungenProInstanz = 200000 
 		// class3: anzahlLoesungenProInstanz = 400000 
