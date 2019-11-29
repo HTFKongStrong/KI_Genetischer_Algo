@@ -79,9 +79,9 @@ public class GaSolver implements Solver {
 
             //Replace Eltern mit kids
             ArrayList<Individual> newGeneration = replaceDeleteNlast(populationKids, populationEltern, anzahlKeepDelete, selektierteEltern);
-            populationEltern.clear();
             populationKids.clear();
-            populationEltern = newGeneration;
+            Collections.copy(populationEltern, newGeneration);
+            newGeneration.clear();
 
             anzahlIndividuenGes += populationsGroesse;
             generation++;
@@ -250,12 +250,13 @@ public class GaSolver implements Solver {
             newGeneration.add(populationEltern.get(indexInd));
         }
 
-        //sort populationKids: schlechteste Fitness oben: größte Fitness
+        //sort populationKids: schlechteste Fitness unten: größte Fitness
         Comparator<Individual> compareByFitness = (Individual o1, Individual o2) -> Double.compare(o1.getFitness(), o2.getFitness());
-        Collections.sort(populationKids, compareByFitness.reversed());
+        Collections.sort(populationKids, compareByFitness);
 
         //kids 25% / 50 schlechtesten löschen
-        for (int i = 0; i < anzahlKeepDelete ; i++) {
+        int löschen = populationsGroesse - anzahlKeepDelete;
+        for (int i = (populationKids.size() - 1); i >= löschen ; i--) {
             populationKids.remove(i);
         }
 

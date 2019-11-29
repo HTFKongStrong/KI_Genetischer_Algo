@@ -77,12 +77,10 @@ public class GaSolverWettkampf implements Solver {
 
             //Replace Eltern mit kids
             ArrayList<Individual> newGeneration = replaceDeleteNlast(populationKids, populationEltern, anzahlKeepDelete, selektierteEltern);
-           // populationEltern.clear();
             populationKids.clear();
             matingpool.clear();
 
             Collections.copy(populationEltern, newGeneration);
-           // populationEltern = newGeneration;
             newGeneration.clear();
 
             anzahlIndividuenGes += populationsGroesse;
@@ -212,12 +210,11 @@ public class GaSolverWettkampf implements Solver {
     //andere Verhältnisse vllt besser?
     private ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete, ArrayList<Individual> selektierteEltern){
         ArrayList<Individual> newGeneration = new ArrayList<>();
-        ArrayList<Integer> zahlenBesetzt = new ArrayList<>(); //wird nie befüllt???
+        ArrayList<Integer> zahlenBesetzt = new ArrayList<>();
 
         //50 eltern (25%) sollen in newGeneration übernommen werden
         for (int i = 0; i < anzahlKeepDelete ; i++) {
             int indexInd = check(zahlenBesetzt, selektierteEltern, populationEltern);
-            zahlenBesetzt.add(indexInd); //neu
             newGeneration.add(populationEltern.get(indexInd));
         }
 
