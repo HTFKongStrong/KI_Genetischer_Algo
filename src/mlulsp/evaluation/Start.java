@@ -9,6 +9,7 @@ import mlulsp.io.DirectoryWalker;
 import mlulsp.io.InstanceReader;
 import mlulsp.solvers.ga.GaSolver;
 import mlulsp.io.ReadBestResults;
+import mlulsp.solvers.ga.GaSolverWettkampf;
 
 public class Start {
 
@@ -41,8 +42,9 @@ public class Start {
 			Instance i              = inReader.parse();
 			optimalValue            = ReadBestResults.getBestSolution(new File(solFile), i.getName());
 
-			GaSolver solver         = new GaSolver(anzahlLoesungenProInstanz);
-			
+	//		GaSolver solver         = new GaSolver(anzahlLoesungenProInstanz);
+			GaSolverWettkampf solver= new GaSolverWettkampf(anzahlLoesungenProInstanz);
+
 			long start = System.currentTimeMillis();
 			ProductionSchedule solution = solver.solve(i);
 			long time = System.currentTimeMillis() - start;

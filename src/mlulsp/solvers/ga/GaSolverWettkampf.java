@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class GaSolver implements Solver {
+public class GaSolverWettkampf implements Solver {
     //Eigene zusetzende Entscheidungsvariablen
     private final int populationsGroesse = 200;
-    private final int anzahlKeepDelete = 0; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
+    private final int anzahlKeepDelete = 20; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
+    private final int selektionsDruck = 4; //ab 4 //replaceWettkampf:  wie viele in den matingpool gelangen sollen, also die höchste Anzahl an Eltern die reproduzieren können
 
     private double bestFitness = 999999999; //beste Lösung
     private int anzahlIndividuenGes = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
     private final int anzahlLoesungen;
 
-    public GaSolver(int anzahlLoesungen) {
+    public GaSolverWettkampf(int anzahlLoesungen) {
         this.anzahlLoesungen = anzahlLoesungen;
     }
 
@@ -42,22 +43,19 @@ public class GaSolver implements Solver {
         anzahlIndividuenGes += populationsGroesse;
 
         //Kinder zeugen
-        ArrayList<Individual> populationKids = new ArrayList<>();
         int generation =0;
         while(anzahlIndividuenGes < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
             ArrayList<Individual> selektierteEltern = new ArrayList<>(); //Damit bei replace() nicht schon selektierte Individuuen behalten werden
+            ArrayList<Individual> populationKids = new ArrayList<>();
+            //matingpool befüllen
+            ArrayList<Individual> matingpool = new ArrayList<>();
+            matingpool = getMatingpool(populationEltern, matingpool, selektionsDruck);
+
             while(populationKids.size() < populationsGroesse){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
                 //Selektieren 2er Eltern
-                //müssen nicht zu anzahlIndividuenGes hinzugefügt werden, da oben schon hinzugefügt
-                ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
-                int groese1 = elternIndex.get(0);
-                int groese2 = elternIndex.get(1);
-
-                if(groese2 > populationsGroesse || groese1 > populationsGroesse){
-                    System.out.println("FEEEEEEEEHLER Index ist größer");
-                }
-                Individual mama = populationEltern.get(groese1);
-                Individual papa = populationEltern.get(groese2);
+                ArrayList<Individual> selektierteIndividuuen = selektionWettkampf(matingpool);
+                Individual mama = selektierteIndividuuen.get(0);
+                Individual papa = selektierteIndividuuen.get(1);
                 selektierteEltern.add(mama);
                 selektierteEltern.add(papa);
 
@@ -79,9 +77,13 @@ public class GaSolver implements Solver {
 
             //Replace Eltern mit kids
             ArrayList<Individual> newGeneration = replaceDeleteNlast(populationKids, populationEltern, anzahlKeepDelete, selektierteEltern);
-            populationEltern.clear();
+           // populationEltern.clear();
             populationKids.clear();
-            populationEltern = newGeneration;
+            matingpool.clear();
+
+            Collections.copy(populationEltern, newGeneration);
+           // populationEltern = newGeneration;
+            newGeneration.clear();
 
             anzahlIndividuenGes += populationsGroesse;
             generation++;
@@ -93,70 +95,38 @@ public class GaSolver implements Solver {
         return indBestFitness.getPhaenotype(); //return den Phänotyp vom Typ ProductionSchedule
     }
 
-    private ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
-        double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größeren Datentyp finden
-        //BigDecimal wenn zu klein
+    private ArrayList<Individual> getMatingpool(ArrayList<Individual> populationEltern, ArrayList<Individual> matingpool, int selektionsdruck){
+        ArrayList<Individual> populationElternCopy = new ArrayList<>(populationEltern);
+        //schlechteste Fitness unten: größte Fitness
+        Comparator<Individual> compareByFitness = (Individual o1, Individual o2) -> Double.compare(o1.getFitness(), o2.getFitness());
+        Collections.sort(populationElternCopy, compareByFitness);
 
-        ArrayList<Double> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
-        ArrayList<Integer> selectedInd = new ArrayList<>();
-
-        //Berechnung Gesamtfitness
-        for (Individual ind: populationEltern) {
-            gesamtFitness += ind.getFitness();
+        for (int i = (populationElternCopy.size() - 1); i >= selektionsdruck ; i--) {
+            populationElternCopy.remove(i);
         }
-
-        //Berechnung Verhältnisse & in ArrayList speichern
-        double add = 0;
-        for (Individual ind: populationEltern) {
-            double verhaeltnis = ind.getFitness()/gesamtFitness; //Verhältnis = wert zw. 0 und 1
-            //Max zahlen ber. und in ArrayList speichern
-            double max = (verhaeltnis * 100); //double da -> Möglicher Fehler durch Rundung/casten? Manche Zahlen nicht besetzt? (sind dann Zahlen kurz vor & nach 1000)
-            add += max;
-            maxZahlenInd.add(add);
+        for (Individual ind: populationElternCopy) {
+            matingpool.add(ind);
         }
-        //Berechnung Zufallszahlen: zw. 0-1000
-//        int zufallszahl1 = (int)(Math.random() * 100) + 1;
-//        int zufallszahl2 = (int)(Math.random() * 100) + 1;
-
-        //um Fehler s.o zu vermeiden (zahlen !=100)
-        double obereGrenze = add;
-        double zufallszahl1 = (Math.random() * obereGrenze) ;
-        double zufallszahl2 = (Math.random() * obereGrenze) ;
-
-        //get Index des Individuums das die Zufallszahl trifft
-        int indexZufallszahl1 = getIndRoulette(zufallszahl1, maxZahlenInd);
-        int indexZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
-
-        //Verhindern dass das gleiche Individuum zweimal selektiert wird: Zufallszahl muss nochmal berechnet werden
-        while (indexZufallszahl2 == indexZufallszahl1){
-            zufallszahl2 = (Math.random() * obereGrenze) ;
-            indexZufallszahl2 = getIndRoulette(zufallszahl2, maxZahlenInd);
-        }
-        //ArrayIndexOutofBounds vermeiden
-        if (indexZufallszahl1 == populationsGroesse){ indexZufallszahl1 = populationsGroesse - 1; }
-        if (indexZufallszahl2 == populationsGroesse){ indexZufallszahl2 = populationsGroesse - 1; }
-
-        selectedInd.add(indexZufallszahl1);
-        selectedInd.add(indexZufallszahl2);
-
-        return selectedInd;
-
+        return matingpool;
     }
-    //Get Index Individuum das die Zufallszahl trifft
-    private int getIndRoulette(double zufallszahl, ArrayList<Double> maxZahlenInd ){
-        int indexIndividuum = 0;
-        double maxZahlIndVorherig = 0;
-        if (!(zufallszahl == 0)){
-            for (Double maxZahlInd: maxZahlenInd) {
-                if (zufallszahl == maxZahlInd){ break; }
-                if (zufallszahl > maxZahlIndVorherig && zufallszahl < maxZahlInd){ break;}
-                indexIndividuum++;
-                maxZahlIndVorherig = maxZahlInd;
-            }
-        }
-        return indexIndividuum;
+    private int indexRandom(int obereGrenze){
+        int selektierterIndex = (int) (Math.random() * obereGrenze) -1;
+        if (selektierterIndex < 0){ selektierterIndex =0;}
+        return selektierterIndex;
     }
-
+    private ArrayList<Individual> selektionWettkampf(ArrayList<Individual> matingpool){
+        int obereGrenze = matingpool.size();
+        int anzahlKinder = 2;
+        ArrayList<Individual> selektierteIndividuuen = new ArrayList<>();
+        int selektierterIndex1 =0;
+        for (int i = 0; i < anzahlKinder ; i++) {
+            int selektierterIndex = indexRandom(obereGrenze);
+            if(i ==0 ){ selektierterIndex1 = selektierterIndex; }
+            if(i ==1 && selektierterIndex1 == selektierterIndex) { i = 0; selektierterIndex = indexRandom(obereGrenze);}
+            else selektierteIndividuuen.add(matingpool.get(selektierterIndex));
+        }
+        return selektierteIndividuuen;
+    }
 
     //Crossover ist auch in Individual von Homberger
     private ArrayList<Individual> templateCrossover(Individual mama, Individual papa, Instance instance){
@@ -242,27 +212,29 @@ public class GaSolver implements Solver {
     //andere Verhältnisse vllt besser?
     private ArrayList<Individual> replaceDeleteNlast(ArrayList<Individual> populationKids, ArrayList<Individual> populationEltern, int anzahlKeepDelete, ArrayList<Individual> selektierteEltern){
         ArrayList<Individual> newGeneration = new ArrayList<>();
-        ArrayList<Integer> zahlenBesetzt = new ArrayList<>();
+        ArrayList<Integer> zahlenBesetzt = new ArrayList<>(); //wird nie befüllt???
 
         //50 eltern (25%) sollen in newGeneration übernommen werden
         for (int i = 0; i < anzahlKeepDelete ; i++) {
             int indexInd = check(zahlenBesetzt, selektierteEltern, populationEltern);
+            zahlenBesetzt.add(indexInd); //neu
             newGeneration.add(populationEltern.get(indexInd));
         }
 
-        //sort populationKids: schlechteste Fitness oben: größte Fitness
+        //sort populationKids: schlechteste Fitness unten: größte Fitness
         Comparator<Individual> compareByFitness = (Individual o1, Individual o2) -> Double.compare(o1.getFitness(), o2.getFitness());
-        Collections.sort(populationKids, compareByFitness.reversed());
+        Collections.sort(populationKids, compareByFitness);
 
         //kids 25% / 50 schlechtesten löschen
-        for (int i = 0; i < anzahlKeepDelete ; i++) {
+        int löschen = populationsGroesse - anzahlKeepDelete;
+        for (int i = (populationKids.size() - 1); i >= löschen ; i--) {
             populationKids.remove(i);
         }
 
         //restlichen Kids zur neuen Generation hinzufügen
         newGeneration.addAll(populationKids);
         if (newGeneration.size() != populationEltern.size()){
-            System.out.println("FEEEEEEEHLER ungleiche Populationsgröße");
+            System.out.println("FEEEEEEEHLER ungleiche Populationsgröße: size: " + newGeneration.size());
         }
         return newGeneration;
     }
