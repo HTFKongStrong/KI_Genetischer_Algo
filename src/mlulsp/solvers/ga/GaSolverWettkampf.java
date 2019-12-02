@@ -10,8 +10,8 @@ import java.util.Comparator;
 
 public class GaSolverWettkampf implements Solver {
     //Eigene zusetzende Entscheidungsvariablen
-    private final int populationsGroesse = 200;
-    private final int anzahlKeepDelete = 20; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
+    private final int populationsGroesse = 600;
+    private final int anzahlKeepDelete = 50; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
     private final int selektionsDruck = 4; //ab 4 //replaceWettkampf:  wie viele in den matingpool gelangen sollen, also die höchste Anzahl an Eltern die reproduzieren können
 
     private double bestFitness = 999999999; //beste Lösung
@@ -51,7 +51,7 @@ public class GaSolverWettkampf implements Solver {
             ArrayList<Individual> matingpool = new ArrayList<>();
             matingpool = getMatingpool(populationEltern, matingpool, selektionsDruck);
 
-            while(populationKids.size() < populationsGroesse){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
+            while(populationKids.size() < populationsGroesse && anzahlIndividuenGes < anzahlLoesungen){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
                 //Selektieren 2er Eltern
                 ArrayList<Individual> selektierteIndividuuen = selektionWettkampf(matingpool);
                 Individual mama = selektierteIndividuuen.get(0);
@@ -68,8 +68,12 @@ public class GaSolverWettkampf implements Solver {
 
                 //zur neuen Population hinzufügen
                 populationKids.add(kids.get(0));
+                anzahlIndividuenGes +=1;
+                if (anzahlIndividuenGes >= anzahlLoesungen){
+                    break;
+                }
                 populationKids.add(kids.get(1));
-
+                anzahlIndividuenGes += 1;
             }
             //decode und evaluate neue Population
             //dabei in der Methode schon nach neuer bestLösung gesucht
@@ -83,9 +87,8 @@ public class GaSolverWettkampf implements Solver {
             Collections.copy(populationEltern, newGeneration);
             newGeneration.clear();
 
-            anzahlIndividuenGes += populationsGroesse;
             generation++;
-            System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
+           // System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
         }
 
         indBestFitness.ausgabe(instance);
@@ -223,16 +226,13 @@ public class GaSolverWettkampf implements Solver {
         Collections.sort(populationKids, compareByFitness);
 
         //kids 25% / 50 schlechtesten löschen
-        int löschen = populationsGroesse - anzahlKeepDelete;
+        int löschen = populationKids.size() - anzahlKeepDelete;
         for (int i = (populationKids.size() - 1); i >= löschen ; i--) {
             populationKids.remove(i);
         }
 
         //restlichen Kids zur neuen Generation hinzufügen
         newGeneration.addAll(populationKids);
-        if (newGeneration.size() != populationEltern.size()){
-            System.out.println("FEEEEEEEHLER ungleiche Populationsgröße: size: " + newGeneration.size());
-        }
         return newGeneration;
     }
 }

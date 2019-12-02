@@ -46,7 +46,7 @@ public class GaSolver implements Solver {
         int generation =0;
         while(anzahlIndividuenGes < anzahlLoesungen){ // es dürfen nur 400.000 Individuuen pro Optimierungslauf erstellt werden
             ArrayList<Individual> selektierteEltern = new ArrayList<>(); //Damit bei replace() nicht schon selektierte Individuuen behalten werden
-            while(populationKids.size() < populationsGroesse){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
+            while(populationKids.size() < populationsGroesse && anzahlIndividuenGes < anzahlLoesungen){ //beenden wenn gleiche Populationsgröße erreicht ist : AUFPASSEN; wenn populationsgröße ungerade, muss dies angepasst werden
                 //Selektieren 2er Eltern
                 //müssen nicht zu anzahlIndividuenGes hinzugefügt werden, da oben schon hinzugefügt
                 ArrayList<Integer> elternIndex = selektionRoulette(populationEltern);
@@ -70,7 +70,12 @@ public class GaSolver implements Solver {
 
                 //zur neuen Population hinzufügen
                 populationKids.add(kids.get(0));
+                anzahlIndividuenGes +=1;
+                if (anzahlIndividuenGes >= anzahlLoesungen){
+                    break;
+                }
                 populationKids.add(kids.get(1));
+                anzahlIndividuenGes += 1;
 
             }
             //decode und evaluate neue Population
@@ -83,7 +88,6 @@ public class GaSolver implements Solver {
             Collections.copy(populationEltern, newGeneration);
             newGeneration.clear();
 
-            anzahlIndividuenGes += populationsGroesse;
             generation++;
             System.out.println("Generation "+ generation+ " ende " + indBestFitness.getFitness());
         }
@@ -255,16 +259,13 @@ public class GaSolver implements Solver {
         Collections.sort(populationKids, compareByFitness);
 
         //kids 25% / 50 schlechtesten löschen
-        int löschen = populationsGroesse - anzahlKeepDelete;
+        int löschen = populationKids.size() - anzahlKeepDelete;
         for (int i = (populationKids.size() - 1); i >= löschen ; i--) {
             populationKids.remove(i);
         }
 
         //restlichen Kids zur neuen Generation hinzufügen
         newGeneration.addAll(populationKids);
-        if (newGeneration.size() != populationEltern.size()){
-            System.out.println("FEEEEEEEHLER ungleiche Populationsgröße");
-        }
         return newGeneration;
     }
 }
