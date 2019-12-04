@@ -15,11 +15,11 @@ public class GaSolverWettkampfVariation implements Solver {
     private int selektionsDruck = 4; //ab 4!!!! //replaceWettkampf:  wie viele in den matingpool gelangen sollen, also die höchste Anzahl an Eltern die reproduzieren können
     private int anzahlKeepDelete = 20; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
     private double pMut = 0.001;//Mutationswahrscheinlichkeit Individuen
-    double prozentVariationPmut = 0.5; // 0,0 - 1,0 // ab welchem Verhältnis von anzahlLösungen soll pMut erhöht werden
-    double pK = 0.7; //Kreuzungswahrscheinlichkeit
+    private double prozentVariationPmut = 0.5; // 0,0 - 1,0 // ab welchem Verhältnis von anzahlLösungen soll pMut erhöht werden
+    private double pK = 0.7; //Kreuzungswahrscheinlichkeit
 
     //Variablen nicht verändern
-    private double bestFitness = 999999999; //beste Lösung
+    private double bestFitness = Double.MAX_VALUE; //beste Lösung
     private int anzahlIndividuenGes = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
     private final int anzahlLoesungen;
     private int generation =0;
@@ -33,7 +33,7 @@ public class GaSolverWettkampfVariation implements Solver {
        // Individual.mutationsWahrscheinlichkeit(); //auskommentiert Da Individual finale Mutationsws jetzt besitzt
 
         //Erstmal VariablenInput einlesen
-        readConsole();
+       // readConsole();
 
         Individual indBestFitness = new Individual(instance);
 
@@ -76,8 +76,8 @@ public class GaSolverWettkampfVariation implements Solver {
                 ArrayList<Individual> kids = templateCrossover(mama, papa, instance);
 
                 //Mutation - beider Nachkommen
-                myMutation(kids.get(0), pMutVar);
-                myMutation(kids.get(1), pMutVar);
+                swapMutation(kids.get(0), pMutVar);
+                swapMutation(kids.get(1), pMutVar);
 
                 //zur neuen Population hinzufügen
                 populationKids.add(kids.get(0));
@@ -179,7 +179,7 @@ public class GaSolverWettkampfVariation implements Solver {
 
     //es gibt auch eine Mutate() von Homberger in Individual
     //verwirrend mit firstPeriodforItems und lastPeriodForItems
-    private void myMutation(Individual ind, double pMutVar){
+    private void flipMutation(Individual ind, double pMutVar){
         for (int zeile = 0; zeile < ind.getGenotype().length ; zeile++) {
             for (int spalte = 0; spalte < ind.getGenotype()[zeile].length ; spalte++) {
                 if (Math.random() <= pMutVar ){
@@ -253,6 +253,27 @@ public class GaSolverWettkampfVariation implements Solver {
         return newGeneration;
     }
 
+    private void swapMutation(Individual ind, double pMutVar){
+        int[][] indArray = ind.getGenotype();
+        int length = indArray.length;
+        for (int zeile = 0; zeile < length ; zeile++) {
+            //get 2 random integers between 0 and size of array
+            int zufallszahl1 = (int) (Math.random() * length);
+            int zufallszahl2 = (int) (Math.random() * length);
+            //make sure the 2 numbers are different
+            while(zufallszahl1 == zufallszahl2){
+                zufallszahl2 = (int) (Math.random() * length);
+            }
+            //swap array elements at those indices
+            if (Math.random() <= pMutVar){
+                int temp = indArray[zeile][zufallszahl1];
+                indArray[zeile][zufallszahl1] = indArray[zeile][zufallszahl2];
+                indArray[zeile][zufallszahl2] = temp;
+            }
+        }
+        ind.setGenotype(indArray);
+    }
+
     //Die Mutationswahrscheinlichkeit (pMutVar) erhöht sich randomly nachdem die Populationsgröße (populationsGroesseMutVar)
     //erreicht wurde. Bis zu dieser Populationsgröße bleibt die Mutationsws (pMutVar = pMut) gleich.
     //Die neue Mutationsws wird nach jeder Generation geändert und bleibt über das Erstellen einer Generation gleich.
@@ -260,6 +281,7 @@ public class GaSolverWettkampfVariation implements Solver {
     public double variationPmut(int populationsGroesseMutVar, double pMutVar, double pMutHilf){
         if (anzahlIndividuenGes >= populationsGroesseMutVar){
             pMutVar = (Math.random() *pMutHilf) + pMut;
+            System.out.println("pMutVar: " + pMutVar);
         }
         return pMutVar;
     }
@@ -268,20 +290,27 @@ public class GaSolverWettkampfVariation implements Solver {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Für die Population:");
         System.out.println("Bitte geben Sie die initiale Populationsgroesse ein: ");
-        System.out.println("populationsgroesse : Es muss ein int zw. 2 - 1000 sein");
+        System.out.print("populationsgroesse : Es muss ein int zw. 2 - 1000 sein\n");
         populationsGroesse = scanner.nextInt();
-        System.out.println("Für die Berechnung der Mutation:");
+        System.out.println("\nFür die Berechnung der Mutation:");
         System.out.println("Bitte geben Sie die initiale Mutationswahrscheinlichkeit pMut ein: ");
-        System.out.println("pMut : Es muss ein double zw. 0.0 - 1.0 sein");
+        System.out.println("pMut : Es muss ein double zw. 0.0 - 1.0 sein\n");
         pMut = scanner.nextDouble();
-        System.out.println("Bitte geben Sie eine Prozentzahl an: Nach wie vielen Durchgängen soll pMut erhöht werden");
-        System.out.println("prozentVariationPmut : Es muss ein double zw. 0.0 - 1.0 sein");
+        System.out.println("Bitte geben Sie eine Prozentzahl an: Nach wie vielen Durchgängen soll pMut erhöht werden?");
+        System.out.println("prozentVariationPmut : Es muss ein double zw. 0.0 - 1.0 sein\n");
         prozentVariationPmut = scanner.nextDouble();
-        System.out.println();
-        System.out.println("Für das Crossover: ");
+        System.out.println("\nFür das Crossover: ");
         System.out.println("Bitte geben Sie die Kreuzungswahrscheinlichkeit pk ein: ");
-        System.out.println("pK : Es muss ein double zw. 0.0 - 1.0 sein");
+        System.out.println("pK : Es muss ein double zw. 0.0 - 1.0 sein\n");
         pK = scanner.nextDouble();
+        System.out.println("\nFür die Selektion: ");
+        System.out.println("Bitte geben Sie an, wie viele der besten Individuuen zur Fortpflanzung benutzt werden: ");
+        System.out.println("selektionsDruck : int min=4, max=populationsgröße\n");
+        selektionsDruck = scanner.nextInt();
+        System.out.println("\nFür das Ersetzungsschema: ");
+        System.out.println("Bitte geben Sie an wie viele Eltern in der neuen Generation übernommen werden sollen: ");
+        System.out.println("anzahlKeepDelete : int min=4, max=populationsgröße\n");
+        anzahlKeepDelete = scanner.nextInt();
 
     }
 }

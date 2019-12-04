@@ -13,7 +13,7 @@ public class GaSolver implements Solver {
     private final int populationsGroesse = 200;
     private final int anzahlKeepDelete = 0; //replaceDeleteNLast: die anzahl der Individuuen der Eltern die man behalten möchte und von kids löscht
 
-    private double bestFitness = 999999999; //beste Lösung
+    private double bestFitness = Double.MAX_VALUE; //beste Lösung
     private int anzahlIndividuenGes = 0; //ist Anzahl der Individuuen, von denen die Fitness berechnet wurde
     private final int anzahlLoesungen;
 
@@ -53,9 +53,6 @@ public class GaSolver implements Solver {
                 int groese1 = elternIndex.get(0);
                 int groese2 = elternIndex.get(1);
 
-                if(groese2 > populationsGroesse || groese1 > populationsGroesse){
-                    System.out.println("FEEEEEEEEHLER Index ist größer");
-                }
                 Individual mama = populationEltern.get(groese1);
                 Individual papa = populationEltern.get(groese2);
                 selektierteEltern.add(mama);
@@ -65,8 +62,8 @@ public class GaSolver implements Solver {
                 ArrayList<Individual> kids = templateCrossover(mama, papa, instance);
 
                 //Mutation - beider Nachkommen
-                myMutation(kids.get(0));
-                myMutation(kids.get(1));
+                swapMutation(kids.get(0));
+                swapMutation(kids.get(1));
 
                 //zur neuen Population hinzufügen
                 populationKids.add(kids.get(0));
@@ -98,8 +95,7 @@ public class GaSolver implements Solver {
     }
 
     private ArrayList<Integer> selektionRoulette(ArrayList<Individual> populationEltern){
-        double gesamtFitness = 0; //KANN SEIN DASS DER WERT zu groß ist, und ein Error dadurch entsteht -> größeren Datentyp finden
-        //BigDecimal wenn zu klein
+        double gesamtFitness = 0;
 
         ArrayList<Double> maxZahlenInd = new ArrayList<>(); //index = Individuum; gespeichert = maximale Zahlen (addiert mit der Vorherigen)
         ArrayList<Integer> selectedInd = new ArrayList<>();
@@ -196,7 +192,7 @@ public class GaSolver implements Solver {
 
     //es gibt auch eine Mutate() von Homberger in Individual
     //verwirrend mit firstPeriodforItems und lastPeriodForItems
-    private void myMutation(Individual ind){
+    private void flipMutation(Individual ind){
         for (int zeile = 0; zeile < ind.getGenotype().length ; zeile++) {
             for (int spalte = 0; spalte < ind.getGenotype()[zeile].length ; spalte++) {
                 if (Math.random() <= Individual.pMut ){
@@ -267,5 +263,26 @@ public class GaSolver implements Solver {
         //restlichen Kids zur neuen Generation hinzufügen
         newGeneration.addAll(populationKids);
         return newGeneration;
+    }
+
+    private void swapMutation(Individual ind){
+        int[][] indArray = ind.getGenotype();
+        int length = indArray.length;
+        for (int zeile = 0; zeile < length ; zeile++) {
+            //get 2 random integers between 0 and size of array
+            int zufallszahl1 = (int) (Math.random() * length);
+            int zufallszahl2 = (int) (Math.random() * length);
+            //make sure the 2 numbers are different
+            while(zufallszahl1 == zufallszahl2){
+                zufallszahl2 = (int) (Math.random() * length);
+            }
+            //swap array elements at those indices
+            if (Math.random() <= Individual.pMut ){
+                int temp = indArray[zeile][zufallszahl1];
+                indArray[zeile][zufallszahl1] = indArray[zeile][zufallszahl2];
+                indArray[zeile][zufallszahl2] = temp;
+            }
+        }
+        ind.setGenotype(indArray);
     }
 }
