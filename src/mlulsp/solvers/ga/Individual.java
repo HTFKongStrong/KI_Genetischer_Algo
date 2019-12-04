@@ -27,6 +27,8 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 		return genotype;
 	}
 
+	public void setGenotype(int[][] genotype) { this.genotype = genotype; }
+
 	public ProductionSchedule getPhaenotype(){
 		return phaenotype;
 	}
