@@ -238,14 +238,13 @@ public class GaSolverWettkampf implements Solver {
 
     private void swapMutation(Individual ind){
         int[][] indArray = ind.getGenotype();
-        int length = indArray.length;
-        for (int zeile = 0; zeile < length ; zeile++) {
+        for (int zeile = 0; zeile < indArray.length ; zeile++) {
             //get 2 random integers between 0 and size of array
-            int zufallszahl1 = (int) (Math.random() * length);
-            int zufallszahl2 = (int) (Math.random() * length);
+            int zufallszahl1 = (int) (Math.random() * indArray[zeile].length);
+            int zufallszahl2 = (int) (Math.random() * indArray[zeile].length);
             //make sure the 2 numbers are different
             while(zufallszahl1 == zufallszahl2){
-                zufallszahl2 = (int) (Math.random() * length);
+                zufallszahl2 = (int) (Math.random() * indArray[zeile].length);
             }
             //swap array elements at those indices
             if (Math.random() <= Individual.pMut ){

@@ -12,7 +12,7 @@ public class Individual {// EIn Individuum ist ein Array aus Nullen und Einsen
 	static int lastPeriodforItems[];
 
 	//Eigene zusetzende Entscheidungsvariablen
-	static final double pMut = 0.001;//Mutationswahrscheinlichkeit Individuen
+	static final double pMut = 0.5;//Mutationswahrscheinlichkeit Individuen
     static final double pK = 0.7; //Kreuzungswahrscheinlichkeit
 
 	private int[][] genotype; // NUllen und einser

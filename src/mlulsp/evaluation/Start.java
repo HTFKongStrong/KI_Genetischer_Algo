@@ -10,6 +10,7 @@ import mlulsp.io.InstanceReader;
 import mlulsp.solvers.ga.GaSolver;
 import mlulsp.io.ReadBestResults;
 import mlulsp.solvers.ga.GaSolverWettkampf;
+import mlulsp.solvers.ga.GaSolverWettkampfVariation;
 
 public class Start {
 
@@ -20,8 +21,8 @@ public class Start {
 	
 
 	public void exec() {
-		int anzahlLoesungenProInstanz = 400000; //Anzahl an L�sungen die man rechnen will
-		//int anzahlLoesungenProInstanz = 50000; //Anzahl an L�sungen die man rechnen will
+		//int anzahlLoesungenProInstanz = 400000; //Anzahl an L�sungen die man rechnen will
+		int anzahlLoesungenProInstanz = 50000; //Anzahl an L�sungen die man rechnen will
 		// class1: anzahlLoesungenProInstanz =  50000
 		// class2: anzahlLoesungenProInstanz = 200000 
 		// class3: anzahlLoesungenProInstanz = 400000 
@@ -44,6 +45,7 @@ public class Start {
 
 	//		GaSolver solver         = new GaSolver(anzahlLoesungenProInstanz);
 			GaSolverWettkampf solver= new GaSolverWettkampf(anzahlLoesungenProInstanz);
+	//		GaSolverWettkampfVariation solver = new GaSolverWettkampfVariation(anzahlLoesungenProInstanz);
 
 			long start = System.currentTimeMillis();
 			ProductionSchedule solution = solver.solve(i);
