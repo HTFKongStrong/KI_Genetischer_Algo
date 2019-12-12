@@ -127,8 +127,7 @@ public class GaSolverWettkampfVariation implements Solver {
         return matingpool;
     }
     private int indexRandom(int obereGrenze){
-        int selektierterIndex = (int) (Math.random() * obereGrenze) -1;
-        if (selektierterIndex < 0){ selektierterIndex =0;}
+        int selektierterIndex = (int) (Math.random() * obereGrenze+1);
         return selektierterIndex;
     }
     private ArrayList<Individual> selektionWettkampf(ArrayList<Individual> matingpool){
