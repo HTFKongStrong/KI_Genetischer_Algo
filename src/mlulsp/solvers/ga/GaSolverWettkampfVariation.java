@@ -242,8 +242,8 @@ public class GaSolverWettkampfVariation implements Solver {
         Collections.sort(populationKids, compareByFitness);
 
         //kids 25% / 50 schlechtesten löschen
-        int löschen = populationsGroesse - anzahlKeepDelete;
-        for (int i = (populationKids.size() - 1); i >= löschen ; i--) {
+        int loeschen = populationsGroesse - anzahlKeepDelete;
+        for (int i = (populationKids.size() - 1); i >= loeschen ; i--) {
             populationKids.remove(i);
         }
 
